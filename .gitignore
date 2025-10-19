@@ -12,6 +12,26 @@
 /[Uu]ser[Ss]ettings/
 *.log
 
+# Ignore Resources
+Assets/Resources/A lot of useful icons_02/
+Assets/Resources/Alvios/
+Assets/Resources/asset_store/
+Assets/Resources/Brick Project Studio/
+Assets/Resources/ChestOfDrawers/
+Assets/Resources/Gabies_Assets/
+Assets/Resources/HotelRoom-Mavi3D/
+Assets/Resources/Keypad/
+Assets/Resources/NaughtyAttributes/
+Assets/Resources/Plugins/
+Assets/Resources/russian_buildings/
+Assets/Resources/SkySeries Freebie/
+Assets/Resources/Sounds/
+Assets/Resources/Survival Props/
+Assets/Resources/YughuesFreeGroundMaterials/
+Assets/Resources/DOTweenSettings.asset
+Assets/Resources/*.meta
+
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
@@ -27,6 +47,7 @@
 
 # Visual Studio cache directory
 .vs/
+.vscode/
 
 # Gradle cache directory
 .gradle/
@@ -37,6 +58,7 @@ ExportedObj/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user

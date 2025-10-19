@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77e6ef17f16549245b94b15b98515668, type: 3}
+  m_Name: Couch01
+  m_EditorClassIdentifier: 
+  _sentences:
+  - _textDuration: 0.1
+    _textFontSize: 50
+    _sentence: "\u9AD8\u4FA1\u305D\u3046\u306A\u30BD\u30D5\u30A1\u3060\u3002\r\n\u5EA7\u308C\u3070\u5341\u5206\u3059\u304E\u308B\u307B\u3069\u304F\u3064\u308D\u3052\u308B\u3060\u308D\u3046\u3002"
+  - _textDuration: 0.1
+    _textFontSize: 50
+    _sentence: "......\u4ECA\u306F\u304F\u3064\u308D\u304E\u3059\u304E\u308B\u3068\u5371\u967A\u304B\u3082\u3057\u308C\u306A\u3044\u3002\r\n\u3084\u3081\u3066\u304A\u3053\u3046\u3002"
