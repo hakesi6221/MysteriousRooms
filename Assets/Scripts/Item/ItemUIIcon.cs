@@ -6,12 +6,12 @@ using UnityEngine.UI;
 public class ItemUIIcon : MonoBehaviour
 {
     [SerializeField, Header("アイコンimage")]
-    private RawImage _iconImage = null;
+    private Image _iconImage = null;
 
     /// <summary>
     /// アイコンimage
     /// </summary>
-    public RawImage IconImage => _iconImage;
+    public Image IconImage => _iconImage;
 
     [SerializeField, Header("アイコンbutton")]
     private Button _iconButton = null;
@@ -48,7 +48,8 @@ public class ItemUIIcon : MonoBehaviour
     public void SetEmptyIconItem()
     {
         _thisItem = null;
-        _iconImage.texture = null;
+        _iconImage.sprite = null;
+        _iconImage.enabled = false;
         _iconButton.interactable = false;
     }
 
@@ -61,7 +62,8 @@ public class ItemUIIcon : MonoBehaviour
         if (item == null) return;
 
         _thisItem = item;
-        _iconImage.texture = item.ItemTexture;
+        _iconImage.enabled = true;
+        _iconImage.sprite = item.ItemTexture;
         _iconButton.interactable = true;
     }
 }

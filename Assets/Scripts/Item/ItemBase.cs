@@ -22,12 +22,12 @@ public abstract class ItemBase : MonoBehaviour
     public EventSentences ItemSummury { get { return _itemSummury; } }
 
     [SerializeField, Header("インベントリにアイコンとして表示するテクスチャ")]
-    private RenderTexture _itemTexture = null;
+    private Sprite _itemTexture = null;
 
     /// <summary>
     /// インベントリにアイコンとして表示するテクスチャ
     /// </summary>
-    public RenderTexture ItemTexture { get { return _itemTexture; } }
+    public Sprite ItemTexture { get { return _itemTexture; } }
 
     public abstract void OnPickUpEvent();
 

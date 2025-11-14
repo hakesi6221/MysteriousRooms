@@ -22,4 +22,9 @@ public class InteractiveObjTextBase : MonoBehaviour, IInteractiveObjBase
         else
             EventManager.Instance.OnStartEventText(_sentences);
     }
+
+    public void UpdateCursor()
+    {
+        CursorManager.Instance?.OnChangeEventCursor();
+    }
 }

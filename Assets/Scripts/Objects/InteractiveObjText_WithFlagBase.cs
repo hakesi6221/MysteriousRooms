@@ -55,4 +55,9 @@ public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObjBas
                 EventManager.Instance.OnStartEventText(_onFlagSentence);
         }
     }
+
+    public void UpdateCursor()
+    {
+        CursorManager.Instance?.OnChangeEventCursor();
+    }
 }

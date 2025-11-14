@@ -68,4 +68,9 @@ public class InteractiveObjFocusBase : MonoBehaviour, IInteractiveObjBase
         if (_hasFinishFocusEvent)
             OnFinishFocusEvent();
     }
+
+    public void UpdateCursor()
+    {
+        CursorManager.Instance?.OnChangeFocusCursor();
+    }
 }

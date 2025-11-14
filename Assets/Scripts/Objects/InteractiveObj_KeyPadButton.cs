@@ -12,4 +12,9 @@ public class InteractiveObj_KeyPadButton : MonoBehaviour, IInteractiveObjBase
     {
         _keyPadButton.PressButton();
     }
+
+    public void UpdateCursor()
+    {
+        CursorManager.Instance?.OnChangeEventCursor();
+    }
 }

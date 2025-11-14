@@ -69,7 +69,7 @@ Shader "Custom/DissolveShader"
                 // メインのテクスチャの色を決定
                 half4 mainColor = tex2D(_MainTex, i.uv) * i.color;
                 // ノイズテクスチャの1値を取り出し、1,0の2値化する
-                half noise = tex2D(_DissolveTex, i.uv).r;
+                half noise = tex2D(_DissolveTex, i.positionHCS.xy * 0.01).r;
                 half alpha = step(_DissolveAmount, noise);
 
                 // 閾値によって1, 0に分かれたノイズの値をα値に乗算

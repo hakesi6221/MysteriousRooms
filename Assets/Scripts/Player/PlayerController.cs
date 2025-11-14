@@ -96,16 +96,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // カーソルを合わせたオブジェクトの種類によってカーソルを変える
-
-        if (tapObj is InteractiveObjFocusBase)
-            // 注視できるオブジェクトの場合
-            CursorManager.Instance.OnChangeFocusCursor();
-        else if (tapObj is InteractiveObjTextBase)
-            // テキストを発生させるオブジェクトの場合
-            CursorManager.Instance.OnChangeEventCursor();
-        else if (tapObj is InteractiveObjText_WithFlagBase)
-            // テキストを発生させる(フラグあり)オブジェクトの場合
-            CursorManager.Instance.OnChangeEventCursor();
+        tapObj.UpdateCursor();
     }
 
     // Update is called once per frame
