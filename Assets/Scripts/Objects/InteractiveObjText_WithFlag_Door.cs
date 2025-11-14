@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InteractiveObjText_WithFlag_Door : InteractiveObjText_WithFlagBase

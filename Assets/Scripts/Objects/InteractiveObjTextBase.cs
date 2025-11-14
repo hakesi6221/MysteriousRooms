@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InteractiveObjTextBase : MonoBehaviour, IInteractiveObjBase

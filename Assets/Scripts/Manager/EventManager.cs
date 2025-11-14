@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
 using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Threading;
-using System.Threading.Tasks;
 
 public class EventManager : SingletonMonoBehaviour<EventManager>
 {
