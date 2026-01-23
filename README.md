@@ -23,7 +23,7 @@
 | 製作期間 | 1ヶ月 |
 | ブラッシュアップ期間 | 2025/10/15～ |
 | 使用ツール | Unity / Visual Studio Code |
-| Unityバージョン | 2022.3.62f1 |
+| Unityバージョン | 2022.3.62f2 |
 | Render Pipeline | Universal Render Pipeline 3D |
 | 対象プラットフォーム | PC / WebGL |
 
