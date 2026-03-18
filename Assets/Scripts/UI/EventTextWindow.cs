@@ -5,6 +5,10 @@ using System;
 using UnityEngine.UI;
 using TMPro;
 
+/// <summary>
+/// メイン画面の、テキストウィンドウの管理を行うクラス
+/// 表示非表示の切り替えと、その際のアニメーションを担当している
+/// </summary>
 public class EventTextWindow : MonoBehaviour
 {
     [SerializeField, Header("テキストウインドウの親")]

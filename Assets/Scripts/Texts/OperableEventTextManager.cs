@@ -1,32 +1,35 @@
 using Cysharp.Threading.Tasks;
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 
+/// <summary>
+/// ã‚¤ãƒ™ãƒ³ãƒˆãªã©ã§ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºã‚’ç®¡ç†ã™ã‚‹ã‚¯ãƒ©ã‚¹
+/// å¼•æ•°ã§ã‚‚ã‚‰ã£ãŸæƒ…å ±ã‚’æŠ½å‡ºã—ã€ãƒ†ã‚­ã‚¹ãƒˆã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã¸ã®å‡ºåŠ›ã‚’è¡Œã†ã€‚
+/// </summary>
 public class OperableEventTextManager : MonoBehaviour
 {
-    [SerializeField, Header("ƒeƒLƒXƒgƒEƒBƒ“ƒhƒEŠÇ—ƒXƒNƒŠƒvƒg")]
+    [SerializeField, Header("ãƒ†ã‚­ã‚¹ãƒˆã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç®¡ç†ã‚¹ã‚¯ãƒªãƒ—ãƒˆ")]
     private EventTextWindow _textWindow = null;
 
-    // Œ»İ‚ÌƒeƒLƒXƒg•\¦ŠÇ—ƒXƒNƒŠƒvƒg
+    // ç¾åœ¨ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºç®¡ç†ã‚¹ã‚¯ãƒªãƒ—ãƒˆ
     private DisplayTextOneChar _currentOperateTexts = null;
 
-    // Œ»İ‚Ì•\¦—\’è•¶
+    // ç¾åœ¨ã®è¡¨ç¤ºäºˆå®šæ–‡
     private EventSentences _currentCentences = null;
 
-    // Œ»İ‚Ì•\¦—\’è•¶‚Ì’†‚ÌAŒ»İ•\¦‚µ‚Ä‚¢‚é•¶‚Ì”Ô†
+    // ç¾åœ¨ã®è¡¨ç¤ºäºˆå®šæ–‡ã®ä¸­ã®ã€ç¾åœ¨è¡¨ç¤ºã—ã¦ã„ã‚‹æ–‡ã®ç•ªå·
     private int _currentCentenceIndex = 0;
 
-    // Œ»İ‚Ìo—Íæ‚ÌTMP
+    // ç¾åœ¨ã®å‡ºåŠ›å…ˆã®TMP
     private TextMeshProUGUI _currentTMP = null;
 
-    // Œ»İ‚ÌƒeƒLƒXƒg•\¦‚ªI‚í‚Á‚½Œã‚É‹N‚±‚éƒCƒxƒ“ƒg
+    // ç¾åœ¨ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºãŒçµ‚ã‚ã£ãŸå¾Œã«èµ·ã“ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆ
     private Action _currentAfterEvent = null;
 
     /// <summary>
-    /// ƒeƒLƒXƒg‚ğ¶¬
+    /// ãƒ†ã‚­ã‚¹ãƒˆã‚’ç”Ÿæˆ
     /// </summary>
     /// <returns></returns>
     private async void GenerateTexts()
@@ -35,7 +38,7 @@ public class OperableEventTextManager : MonoBehaviour
         var token = this.GetCancellationTokenOnDestroy();
         try
         {
-            // ƒeƒLƒXƒg‚ğ•\¦ŠJn
+            // ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤ºé–‹å§‹
             await _currentOperateTexts.IDisplayTextOneCharacter(
                         _currentCentences.Sentences[_currentCentenceIndex].Sentence
                         , _currentTMP
@@ -50,28 +53,28 @@ public class OperableEventTextManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘€ì‰Â”\‚ÈƒCƒxƒ“ƒgƒeƒLƒXƒg‚Ì•\¦‚ğŠJn‚µA‘€ì‚ğØ‚è‘Ö‚¦‚é
-    /// ƒeƒLƒXƒgI—¹Œã‚É”­¶‚·‚éƒCƒxƒ“ƒg‚ğİ’è
+    /// æ“ä½œå¯èƒ½ãªã‚¤ãƒ™ãƒ³ãƒˆãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºã‚’é–‹å§‹ã—ã€æ“ä½œã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
+    /// ãƒ†ã‚­ã‚¹ãƒˆçµ‚äº†å¾Œã«ç™ºç”Ÿã™ã‚‹ã‚¤ãƒ™ãƒ³ãƒˆã‚’è¨­å®š
     /// </summary>
     /// <param name="centences"></param>
     /// <param name="tmp"></param>
     /// <param name="speed"></param>
-    /// <param name="afterEvent">ƒeƒLƒXƒg•\¦I—¹Œã‚ÌƒCƒxƒ“ƒg</param>
-    public async void OnStartOperateTextWithEvent(EventSentences centences, TextMeshProUGUI tmp, Action afterEvent)
+    /// <param name="afterEvent">ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºçµ‚äº†å¾Œã®ã‚¤ãƒ™ãƒ³ãƒˆ</param>
+    public void OnStartOperateTextWithEvent(EventSentences centences, TextMeshProUGUI tmp, Action afterEvent)
     {
-        // ‰Ò“­ğŒ‚Ì§ŒÀ
+        // ç¨¼åƒæ¡ä»¶ã®åˆ¶é™
         if (MaingameManager.Instance.CurrentOperate == OperateState.Text) return;
         if (_currentOperateTexts != null) return;
         if (centences == null)
         {
-            Debug.LogWarning("ƒeƒLƒXƒg‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+            Debug.LogWarning("ãƒ†ã‚­ã‚¹ãƒˆãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“");
             return;
         }
 
-        // ƒeƒLƒXƒg•\¦ŠÇ—ƒNƒ‰ƒX‚ğì¬
+        // ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºç®¡ç†ã‚¯ãƒ©ã‚¹ã‚’ä½œæˆ
         DisplayTextOneChar displayTxt = new DisplayTextOneChar();
 
-        // Œ»İ‚ÌŠeî•ñ‚ğŠi”[
+        // ç¾åœ¨ã®å„æƒ…å ±ã‚’æ ¼ç´
         _currentCentences = centences;
         _currentCentenceIndex = 0;
         _currentTMP = tmp;
@@ -79,34 +82,34 @@ public class OperableEventTextManager : MonoBehaviour
         _currentOperateTexts = displayTxt;
         _currentAfterEvent = afterEvent;
 
-        // ‘€ìƒ‚[ƒh‚ğƒeƒLƒXƒg‚É•ÏX
+        // æ“ä½œãƒ¢ãƒ¼ãƒ‰ã‚’ãƒ†ã‚­ã‚¹ãƒˆã«å¤‰æ›´
         MaingameManager.Instance.ChangeOperate(OperateState.Text);
 
-        // ƒeƒLƒXƒg•\¦ŠJn
+        // ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºé–‹å§‹
         GenerateTexts();
     }
 
     /// <summary>
-    /// ‘€ì‰Â”\‚ÈƒCƒxƒ“ƒgƒeƒLƒXƒg‚Ì•\¦‚ğŠJn‚µA‘€ì‚ğØ‚è‘Ö‚¦‚é
+    /// æ“ä½œå¯èƒ½ãªã‚¤ãƒ™ãƒ³ãƒˆãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºã‚’é–‹å§‹ã—ã€æ“ä½œã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹
     /// </summary>
     /// <param name="centences"></param>
     /// <param name="tmp"></param>
     /// <param name="speed"></param>
-    public async void OnStartOperateText(EventSentences centences, TextMeshProUGUI tmp)
+    public void OnStartOperateText(EventSentences centences, TextMeshProUGUI tmp)
     {
-        // ‰Ò“­ğŒ‚Ì§ŒÀ
+        // ç¨¼åƒæ¡ä»¶ã®åˆ¶é™
         if (MaingameManager.Instance.CurrentOperate == OperateState.Text) return;
         if (_currentOperateTexts != null) return;
         if (centences == null)
         {
-            Debug.LogWarning("ƒeƒLƒXƒg‚ªw’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñ");
+            Debug.LogWarning("ãƒ†ã‚­ã‚¹ãƒˆãŒæŒ‡å®šã•ã‚Œã¦ã„ã¾ã›ã‚“");
             return;
         }
 
-        // ƒeƒLƒXƒg•\¦ŠÇ—ƒNƒ‰ƒX‚ğì¬
+        // ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºç®¡ç†ã‚¯ãƒ©ã‚¹ã‚’ä½œæˆ
         DisplayTextOneChar displayTxt = new DisplayTextOneChar();
 
-        // Œ»İ‚ÌŠeî•ñ‚ğŠi”[
+        // ç¾åœ¨ã®å„æƒ…å ±ã‚’æ ¼ç´
         _currentCentences = centences;
         _currentCentenceIndex = 0;
         _currentTMP = tmp;
@@ -114,34 +117,34 @@ public class OperableEventTextManager : MonoBehaviour
         _currentOperateTexts = displayTxt;
         _currentAfterEvent = null;
 
-        // ‘€ìƒ‚[ƒh‚ğƒeƒLƒXƒg‚É•ÏX
+        // æ“ä½œãƒ¢ãƒ¼ãƒ‰ã‚’ãƒ†ã‚­ã‚¹ãƒˆã«å¤‰æ›´
         MaingameManager.Instance.ChangeOperate(OperateState.Text);
 
-        // ƒeƒLƒXƒg•\¦ŠJn
+        // ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºé–‹å§‹
         GenerateTexts();
     }
 
     /// <summary>
-    /// ƒeƒLƒXƒg‚ğ•\¦’†‚ÅAŒ»İ‘€ì’†‚ÌƒCƒxƒ“ƒgƒeƒLƒXƒg‚ª‚ ‚é‚È‚çAŸ‚ÌƒeƒLƒXƒg‚ÉˆÚ“®
-    /// ‚à‚µÅŒã‚ÌƒeƒLƒXƒg‚¾‚Á‚½‚çAƒeƒLƒXƒg‚Ì•\¦‚ğI—¹‚µ‚Ä‘€ì‚àI—¹
+    /// ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤ºä¸­ã§ã€ç¾åœ¨æ“ä½œä¸­ã®ã‚¤ãƒ™ãƒ³ãƒˆãƒ†ã‚­ã‚¹ãƒˆãŒã‚ã‚‹ãªã‚‰ã€æ¬¡ã®ãƒ†ã‚­ã‚¹ãƒˆã«ç§»å‹•
+    /// ã‚‚ã—æœ€å¾Œã®ãƒ†ã‚­ã‚¹ãƒˆã ã£ãŸã‚‰ã€ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºã‚’çµ‚äº†ã—ã¦æ“ä½œã‚‚çµ‚äº†
     /// </summary>
-    /// <returns>ƒeƒLƒXƒgI—¹Œã‚É”­‰Î‚·‚éˆ—</returns>
+    /// <returns>ãƒ†ã‚­ã‚¹ãƒˆçµ‚äº†å¾Œã«ç™ºç«ã™ã‚‹å‡¦ç†</returns>
     public Action OnNextCentence()
     {
-        // ‰Ò“­ğŒ‚Ì§ŒÀ
+        // ç¨¼åƒæ¡ä»¶ã®åˆ¶é™
         if (MaingameManager.Instance.CurrentOperate != OperateState.Text) return null;
         if (_currentOperateTexts == null) return null;
 
-        // ‚Ü‚¾1•¶š‚¸‚Â•\¦’†‚¾‚Á‚½ê‡AƒLƒƒƒ“ƒZƒ‹ˆ—
+        // ã¾ã 1æ–‡å­—ãšã¤è¡¨ç¤ºä¸­ã ã£ãŸå ´åˆã€ã‚­ãƒ£ãƒ³ã‚»ãƒ«å‡¦ç†
         if (_currentOperateTexts.IsAppearning)
         {
-            _currentOperateTexts.OnCancel();
+            _currentOperateTexts.Cancel();
             return null;
         }
-        // ‘S•¶š‚Ì•\¦‚ªI‚í‚Á‚Ä‚¢‚½ê‡A•¶Í‚ªc‚Á‚Ä‚¢‚é‚©‚Åˆ—‚ª•Ï‚í‚é
+        // å…¨æ–‡å­—ã®è¡¨ç¤ºãŒçµ‚ã‚ã£ã¦ã„ãŸå ´åˆã€æ–‡ç« ãŒæ®‹ã£ã¦ã„ã‚‹ã‹ã§å‡¦ç†ãŒå¤‰ã‚ã‚‹
         else
         {
-            // ÅŒã‚Ì•¶Í‚¾‚Á‚½ê‡AƒeƒLƒXƒg•\¦‚ğI—¹‚µ‚Ä‘€ì‚ğI—¹
+            // æœ€å¾Œã®æ–‡ç« ã ã£ãŸå ´åˆã€ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºã‚’çµ‚äº†ã—ã¦æ“ä½œã‚’çµ‚äº†
             if (_currentCentenceIndex >= _currentCentences.Sentences.Count - 1)
             {
                 Action afterEvent = _currentAfterEvent;
@@ -154,11 +157,11 @@ public class OperableEventTextManager : MonoBehaviour
                     return OnFinishEventCentence + afterEvent;
                 }
             }
-            // ‚Ü‚¾•¶Í‚ªc‚Á‚Ä‚¢‚½ê‡AŸ‚Ì•¶Í‚ÖˆÚs
+            // ã¾ã æ–‡ç« ãŒæ®‹ã£ã¦ã„ãŸå ´åˆã€æ¬¡ã®æ–‡ç« ã¸ç§»è¡Œ
             else
             {
                 _currentCentenceIndex++;
-                // ƒeƒLƒXƒg•\¦ŠJn
+                // ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºé–‹å§‹
                 GenerateTexts();
                 return null;
             }
@@ -166,16 +169,16 @@ public class OperableEventTextManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒeƒLƒXƒg•\¦‚ÌI—¹
-    /// I—¹Œã‚ÌƒCƒxƒ“ƒg‚ª‚ ‚éê‡A‚»‚ê‚ğÄ¶
+    /// ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºã®çµ‚äº†
+    /// çµ‚äº†å¾Œã®ã‚¤ãƒ™ãƒ³ãƒˆãŒã‚ã‚‹å ´åˆã€ãã‚Œã‚’å†ç”Ÿ
     /// </summary>
     public void OnFinishEventCentence()
     {
-        // ‰Ò“­ğŒ‚Ì§ŒÀ
+        // ç¨¼åƒæ¡ä»¶ã®åˆ¶é™
         if (MaingameManager.Instance.CurrentOperate != OperateState.Text) return;
         if (_currentOperateTexts == null) return;
 
-        Debug.Log("ƒeƒLƒXƒg•\¦I—¹");
+        Debug.Log("ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤ºçµ‚äº†");
         _textWindow.SetActiveTextFinishIcon(false);
         _currentTMP.gameObject.SetActive(false);
         _currentCentences.Sentences.Clear();

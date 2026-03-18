@@ -1,56 +1,60 @@
 using UnityEngine;
 
+/// <summary>
+/// ä¸€å®šé–“éš”ã§ã¯ã­ã‚‹ã‚ˆã†ãªã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ã—ç¶šã‘ã‚‹UIç”¨ã®ã‚¯ãƒ©ã‚¹
+/// æ–¹å‘ã€è·é›¢ã€å‘¨æœŸã‚’Inspectorã‹ã‚‰è¨­å®šã§ãã‚‹
+/// </summary>
 public class PointerMoveWithConstAccel : MonoBehaviour
 {
-    [SerializeField, Header("UI‚Å‚Ì”z’u‚Ì‚ÌA‹——£‚Ì”{—¦")]
+    [SerializeField, Header("UIã§ã®é…ç½®ã®æ™‚ã®ã€è·é›¢ã®å€ç‡")]
     private float _distanceMagnificationToUI = 100f;
 
-    [SerializeField, Header("ƒAƒjƒ[ƒVƒ‡ƒ“•ûŒü")]
+    [SerializeField, Header("ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ–¹å‘")]
     private Vector2 _animDirection = Vector2.zero;
 
-    [SerializeField, Header("ƒAƒjƒ[ƒVƒ‡ƒ“‚ÌˆÚ“®‹——£")]
+    [SerializeField, Header("ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®ç§»å‹•è·é›¢")]
     private float _animMoveDistance = 0.5f;
 
-    [SerializeField, Header("ƒAƒjƒ[ƒVƒ‡ƒ“1üŠú‚ÌŠÔF•b")]
+    [SerializeField, Header("ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³1å‘¨æœŸã®æ™‚é–“ï¼šç§’")]
     private float _animDuration = 1f;
 
-    // ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‰Á‘¬“x
+    // ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®åŠ é€Ÿåº¦
     private float _animAcceleration = 1f;
 
-    // ‰‘¬“x
+    // åˆé€Ÿåº¦
     private float _animFirstSpeed = 0f;
 
-    // Œ»İ‚Ì‘¬“x
+    // ç¾åœ¨ã®é€Ÿåº¦
     private float _animSpeed = 0f;
 
-    // ‰ŠúˆÊ’u
+    // åˆæœŸä½ç½®
     private Vector3 _defPosition = Vector3.zero;
 
-    // w’è‚³‚ê‚½ƒAƒjƒ[ƒVƒ‡ƒ“•ûŒü‚Ì’PˆÊƒxƒNƒgƒ‹
+    // æŒ‡å®šã•ã‚ŒãŸã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ–¹å‘ã®å˜ä½ãƒ™ã‚¯ãƒˆãƒ«
     private Vector2 _animNormalDir = Vector2.zero;
 
-    // “®‚«‚Ì‘¬“x
+    // å‹•ãã®é€Ÿåº¦
     private Vector3 _animVelocity = Vector2.zero;
 
     // RectTransform
     private RectTransform _rectTransform;
 
     /// <summary>
-    /// Å‚“_‚ÆAÅ‚“_‚Ü‚Å‚Ì•b”‚Å‰Á‘¬“x‚ğ‹‚ß‚é
+    /// æœ€é«˜ç‚¹ã¨ã€æœ€é«˜ç‚¹ã¾ã§ã®ç§’æ•°ã§åŠ é€Ÿåº¦ã‚’æ±‚ã‚ã‚‹
     /// </summary>
-    /// <param name="height">Å‚“_</param>
-    /// <param name="duration">Å‚“_‚Ü‚Å‚Ì•b”</param>
+    /// <param name="height">æœ€é«˜ç‚¹</param>
+    /// <param name="duration">æœ€é«˜ç‚¹ã¾ã§ã®ç§’æ•°</param>
     /// <returns></returns>
     public float CalcAcceleration(float height, float duration)
     {
-        // ”’l‚ª•s³‚Ìê‡A-1‚Å•Ô‚·
+        // æ•°å€¤ãŒä¸æ­£ã®å ´åˆã€-1ã§è¿”ã™
         if (height <= 0 || duration <= 0)
         {
-            // Debug.Log("”’l‚ª•s³‚Å‚·");
-            return -1; 
+            // Debug.Log("æ•°å€¤ãŒä¸æ­£ã§ã™");
+            return -1;
         }
 
-        // a = 8h / T^2@‚È‚Ì‚ÅA
+        // a = 8h / T^2ã€€ãªã®ã§ã€
 
         float acceleration = (8 * height) / (duration * duration);
 
@@ -92,11 +96,11 @@ public class PointerMoveWithConstAccel : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì‘¬“x‚ÌXV
+    /// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®é€Ÿåº¦ã®æ›´æ–°
     /// </summary>
-    /// <param name="animFirstSpeed">‰‘¬“x</param>
-    /// <param name="animAcceleration">‰Á‘¬“x</param>
-    /// <param name="normalDir">ƒAƒjƒ[ƒVƒ‡ƒ“•ûŒü</param>
+    /// <param name="animFirstSpeed">åˆé€Ÿåº¦</param>
+    /// <param name="animAcceleration">åŠ é€Ÿåº¦</param>
+    /// <param name="normalDir">ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³æ–¹å‘</param>
     /// <returns></returns>
     private Vector3 UpdateVelocity(float animFirstSpeed, float animAcceleration, Vector2 normalDir)
     {
@@ -121,7 +125,7 @@ public class PointerMoveWithConstAccel : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒAƒjƒ[ƒVƒ‡ƒ“‚Ìó‘Ô‚ğ‰Šú‰»‚·‚é
+    /// ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®çŠ¶æ…‹ã‚’åˆæœŸåŒ–ã™ã‚‹
     /// </summary>
     public void Initialize()
     {

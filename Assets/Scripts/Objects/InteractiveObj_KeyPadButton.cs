@@ -1,7 +1,11 @@
 using NavKeypad;
 using UnityEngine;
 
-public class InteractiveObj_KeyPadButton : MonoBehaviour, IInteractiveObjBase
+/// <summary>
+/// インタラクト可能なオブジェクト：キーパッドを制御するクラス
+/// インタラクト時、キーパッド側の操作を開始する
+/// </summary>
+public class InteractiveObj_KeyPadButton : MonoBehaviour, IInteractiveObj
 {
     [SerializeField, Header("このキーパッドボタン")]
     private KeypadButton _keyPadButton = null;

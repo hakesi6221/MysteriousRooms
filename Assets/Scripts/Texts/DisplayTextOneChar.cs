@@ -1,31 +1,38 @@
-using UnityEngine;
 using Cysharp.Threading.Tasks;
 using TMPro;
 using System;
 using System.Threading;
 
+/// <summary>
+/// ãƒ†ã‚­ã‚¹ãƒˆã‚’ã€TMPã«å¯¾ã—1æ–‡å­—ãšã¤è¡¨ç¤ºã™ã‚‹å‡¦ç†ã‚’æŒã£ãŸã‚¯ãƒ©ã‚¹
+/// å¼•æ•°ã«æ–‡ç« ã€è¡¨ç¤ºã™ã‚‹TMPã€è¡¨ç¤ºã®æ™‚é–“é–“éš”, ctã‚’é€ã‚‹ã“ã¨ã§å®Ÿè¡Œã§ãã‚‹
+/// å¾…æ©Ÿå¯èƒ½ãªã‚‚ã®ã‚„ã€ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã®é–¢æ•°ã‚‚æŒã¤
+/// </summary>
 public class DisplayTextOneChar
 {
-    // ƒLƒƒƒ“ƒZƒ‹ó•tŠJn•¶š”
+    // ã‚­ãƒ£ãƒ³ã‚»ãƒ«å—ä»˜é–‹å§‹æ–‡å­—æ•°
     private const int CancelBeginChar = 2;
 
-    // ˆê•¶š‚¸‚Â•\¦’†‚©
+    // ä¸€æ–‡å­—ãšã¤è¡¨ç¤ºä¸­ã‹
     private bool _isAppearning = false;
 
-    // ƒLƒƒƒ“ƒZƒ‹‚ªŒÄ‚Î‚ê‚½‚©
+    // ã‚­ãƒ£ãƒ³ã‚»ãƒ«ãŒå‘¼ã°ã‚ŒãŸã‹
     private bool _isCallCancel = false;
 
-    // ƒLƒƒƒ“ƒZƒ‹‰Â”\‚©
+    // ã‚­ãƒ£ãƒ³ã‚»ãƒ«å¯èƒ½ã‹
     private bool _isAbleCancel = false;
 
     /// <summary>
-    /// ˆê•¶š‚¸‚Â•\¦’†‚©
+    /// ä¸€æ–‡å­—ãšã¤è¡¨ç¤ºä¸­ã‹
     /// </summary>
     public bool IsAppearning { get { return _isAppearning; } }
 
     private CancellationTokenSource _cts = new CancellationTokenSource();
 
-    public void OnCancel()
+    /// <summary>
+    /// ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºã‚’ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã—ã€å…¨ã¦ä¸€æ°—ã«è¡¨ç¤ºã™ã‚‹
+    /// </summary>
+    public void Cancel()
     {
         if (!_isAppearning) return;
         if (!_isAbleCancel) return;
@@ -35,11 +42,11 @@ public class DisplayTextOneChar
     }
 
     /// <summary>
-    /// ˆê•¶š‚¸‚ÂƒeƒLƒXƒg‚ğ•\¦‚·‚é
+    /// ä¸€æ–‡å­—ãšã¤ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤ºã™ã‚‹
     /// </summary>
-    /// <param name="centence">•\¦‚µ‚½‚¢•¶</param>
-    /// <param name="tmp">•\¦‚·‚é‘ÎÛ‚ÌTextMeshPro</param>
-    /// <param name="waitTime">•¶š‚ğ•\¦‚·‚é‘Ò‹@ŠÔF•b</param>
+    /// <param name="centence">è¡¨ç¤ºã—ãŸã„æ–‡</param>
+    /// <param name="tmp">è¡¨ç¤ºã™ã‚‹å¯¾è±¡ã®TextMeshPro</param>
+    /// <param name="waitTime">æ–‡å­—ã‚’è¡¨ç¤ºã™ã‚‹å¾…æ©Ÿæ™‚é–“ï¼šç§’</param>
     /// <returns></returns>
     public async void DisplayTextOneCharacter(string centence, TextMeshProUGUI tmp, float waitTime, CancellationToken token)
     {
@@ -49,9 +56,9 @@ public class DisplayTextOneChar
         var linkedToken = linkedSoures.Token;
         _isCallCancel = false;
 
-        // ƒeƒLƒXƒg‚Ì•\¦•¶š”‚ğ0‚É
+        // ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºæ–‡å­—æ•°ã‚’0ã«
         tmp.maxVisibleCharacters = 0;
-        // ƒeƒLƒXƒg‚Ì“à—e‚ğ—^‚¦‚ç‚ê‚½•¶Í‚ÉŒˆ’è
+        // ãƒ†ã‚­ã‚¹ãƒˆã®å†…å®¹ã‚’ä¸ãˆã‚‰ã‚ŒãŸæ–‡ç« ã«æ±ºå®š
         tmp.text = centence;
         tmp.gameObject.SetActive(true);
 
@@ -64,13 +71,13 @@ public class DisplayTextOneChar
                 break;
             }
 
-            // •\¦ƒeƒLƒXƒg‚ğ‘‚â‚µAw’è•¶š”o‚Ä‚¢‚ê‚ÎƒLƒƒƒ“ƒZƒ‹‚ğ‰Â”\‚É‚·‚é
+            // è¡¨ç¤ºãƒ†ã‚­ã‚¹ãƒˆã‚’å¢—ã‚„ã—ã€æŒ‡å®šæ–‡å­—æ•°å‡ºã¦ã„ã‚Œã°ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã‚’å¯èƒ½ã«ã™ã‚‹
             if (++tmp.maxVisibleCharacters >= CancelBeginChar)
             {
                 _isAbleCancel = true;
             }
 
-            // w’è•b‘Ò‚Á‚Ä
+            // æŒ‡å®šç§’å¾…ã£ã¦
             try
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(waitTime), cancellationToken: linkedToken);
@@ -85,12 +92,12 @@ public class DisplayTextOneChar
     }
 
     /// <summary>
-    /// ˆê•¶š‚¸‚ÂƒeƒLƒXƒg‚ğ•\¦‚·‚é
-    /// ‘Ò‹@‰Â”\
+    /// ä¸€æ–‡å­—ãšã¤ãƒ†ã‚­ã‚¹ãƒˆã‚’è¡¨ç¤ºã™ã‚‹
+    /// å¾…æ©Ÿå¯èƒ½
     /// </summary>
-    /// <param name="centence">•\¦‚µ‚½‚¢•¶</param>
-    /// <param name="tmp">•\¦‚·‚é‘ÎÛ‚ÌTextMeshPro</param>
-    /// <param name="waitTime">•¶š‚ğ•\¦‚·‚é‘Ò‹@ŠÔF•b</param>
+    /// <param name="centence">è¡¨ç¤ºã—ãŸã„æ–‡</param>
+    /// <param name="tmp">è¡¨ç¤ºã™ã‚‹å¯¾è±¡ã®TextMeshPro</param>
+    /// <param name="waitTime">æ–‡å­—ã‚’è¡¨ç¤ºã™ã‚‹å¾…æ©Ÿæ™‚é–“ï¼šç§’</param>
     /// <returns></returns>
     public async UniTask IDisplayTextOneCharacter(string centence, TextMeshProUGUI tmp, float waitTime, CancellationToken token)
     {
@@ -100,9 +107,9 @@ public class DisplayTextOneChar
         var linkedToken = linkedSoures.Token;
         _isCallCancel = false;
 
-        // ƒeƒLƒXƒg‚Ì•\¦•¶š”‚ğ0‚É
+        // ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤ºæ–‡å­—æ•°ã‚’0ã«
         tmp.maxVisibleCharacters = 0;
-        // ƒeƒLƒXƒg‚Ì“à—e‚ğ—^‚¦‚ç‚ê‚½•¶Í‚ÉŒˆ’è
+        // ãƒ†ã‚­ã‚¹ãƒˆã®å†…å®¹ã‚’ä¸ãˆã‚‰ã‚ŒãŸæ–‡ç« ã«æ±ºå®š
         tmp.text = centence;
         tmp.gameObject.SetActive(true);
 
@@ -115,13 +122,13 @@ public class DisplayTextOneChar
                 break;
             }
 
-            // •\¦ƒeƒLƒXƒg‚ğ‘‚â‚µAw’è•¶š”o‚Ä‚¢‚ê‚ÎƒLƒƒƒ“ƒZƒ‹‚ğ‰Â”\‚É‚·‚é
+            // è¡¨ç¤ºãƒ†ã‚­ã‚¹ãƒˆã‚’å¢—ã‚„ã—ã€æŒ‡å®šæ–‡å­—æ•°å‡ºã¦ã„ã‚Œã°ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã‚’å¯èƒ½ã«ã™ã‚‹
             if (++tmp.maxVisibleCharacters >= CancelBeginChar)
             {
                 _isAbleCancel = true;
             }
 
-            // w’è•b‘Ò‚Á‚Ä
+            // æŒ‡å®šç§’å¾…ã£ã¦
             try
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(waitTime), cancellationToken: linkedToken);

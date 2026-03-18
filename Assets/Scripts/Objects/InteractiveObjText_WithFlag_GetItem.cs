@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// インタラクト時、テキストを再生後アイテムが入手できるタイプのオブジェクトを制御するクラス
+/// InteractiveObjText_WithFlagBaseを継承しているため、フラグのオンオフによって、入手可能なアイテムを変えられる
+/// </summary>
 public class InteractiveObjText_WithFlag_GetItem : InteractiveObjText_WithFlagBase
 {
     protected override bool _isAfterEvent => true;

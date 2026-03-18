@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// EventSentenceをリストとして持ち、一つのテキストイベントの情報として保存するためのScriptableObjectクラス
+/// </summary>
 [CreateAssetMenu(fileName = "EventText", menuName = "ScriptableObjects/CreateEventText")]
 public class EventSentences : ScriptableObject
 {
@@ -14,6 +17,10 @@ public class EventSentences : ScriptableObject
     public List<EventSentence> Sentences => new List<EventSentence>(_sentences);
 }
 
+/// <summary>
+/// 何かを調べた時などに表示されるテキストのじょうっ法を持ったクラス
+/// ここから情報を拾って、テキストを表示する
+/// </summary>
 [System.Serializable]
 public class EventSentence
 {

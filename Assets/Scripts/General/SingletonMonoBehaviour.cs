@@ -1,18 +1,24 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// MonoBehaviourのクラスを継承したクラスで、汎用的にシングルトンパターンを実装するための基底クラス
+/// 継承したら、そのクラスはMonoBehaviourを継承したシングルトンパターンになる
+/// 継承先でAwakeを使う場合、その最初にこのクラスのAwakeを呼ぶこと
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBehaviour
 {
     /// <summary>
-    /// ���̃I�u�W�F�N�g��DontDestroyOnRoad�ɂ��邩�ǂ���
+    /// このオブジェクトをDontDestroyOnRoadにするかどうか
     /// </summary>
     protected abstract bool dontDestroyOnLoad { get; }
 
     private static T instance;
 
     /// <summary>
-    /// �C���X�^���X���擾
-    /// �C���X�^���X���Ȃ��ꍇ�G���[���o��
+    /// インスタンスを取得
+    /// インスタンスがない場合エラーを出力
     /// </summary>
     public static T Instance
     {
@@ -32,9 +38,9 @@ public abstract class SingletonMonoBehaviour<T> : MonoBehaviour where T : MonoBe
     }
 
     /// <summary>
-    /// ���łɃC���X�^���X������ꍇ�A������폜�AdontDestroyOnLoad��true�̏ꍇ�ݒ�
+    /// すでにインスタンスがある場合、これを削除、dontDestroyOnLoadがtrueの場合設定
     /// </summary>
-    protected virtual void Awake()
+    protected void Awake()
     {
         if (this != Instance)
         {

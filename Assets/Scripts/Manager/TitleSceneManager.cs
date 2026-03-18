@@ -3,6 +3,10 @@ using UnityEngine.UI;
 using Cysharp.Threading.Tasks;
 using System;
 
+/// <summary>
+/// タイトル画面を管理するクラス
+/// 画面にあるボタンに設定する関数を持っていたり、画面遷移時の初期化や操作可否の切り替えを行う
+/// </summary>
 public class TitleSceneManager : MonoBehaviour
 {
 
@@ -52,7 +56,7 @@ public class TitleSceneManager : MonoBehaviour
         _licenseButton.interactable = false;
         _settingButton.interactable = false;
         _exitButton.interactable = false;
-        FadeManager.Instance.CallScene(_moevScene);
+        FadeManager.Instance.CallScene(_moevScene).Forget();
     }
 
     /// <summary>
@@ -78,10 +82,13 @@ public class TitleSceneManager : MonoBehaviour
         _licenseButton.interactable = false;
         _settingButton.interactable = false;
         _exitButton.interactable = false;
+
+        // エディター上での操作であればプレイモード終了
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;//ゲームプレイ終了
+        UnityEditor.EditorApplication.isPlaying = false;
+        // そうでないならアプリを落とす
 #else
-                    Application.Quit();//ゲームプレイ終了
+        Application.Quit();
 #endif
     }
 
@@ -104,13 +111,15 @@ public class TitleSceneManager : MonoBehaviour
     async void Start()
     {
         var token = this.GetCancellationTokenOnDestroy();
+
+        // フェード中はタイトル画面での操作ができないようにする
         _startButton.interactable = false;
         _licenseButton.interactable = false;
         _settingButton.interactable = false;
         _exitButton.interactable = false;
         _returnButton.interactable = false;
         _licenseUI.gameObject.SetActive(false);
-        FadeManager.Instance.FadeInDisplay();
+        FadeManager.Instance.FadeIn().Forget();
 
         try
         {
@@ -118,9 +127,11 @@ public class TitleSceneManager : MonoBehaviour
         }
         catch (OperationCanceledException)
         {
+            Debug.LogWarning("画面フェード待機中に終了しました");
             return;
         }
 
+        // フェードが終了した後にタイトル画面の操作開始時の初期化を行う
         InitializeTitleScene();
     }
 }

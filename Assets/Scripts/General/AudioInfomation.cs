@@ -1,6 +1,9 @@
 using System;
 using UnityEngine;
 
+/// <summary>
+/// ã‚µã‚¦ãƒ³ãƒ‰ç´ æã®ç¨®é¡ã‚’ç¤ºã™Enum
+/// </summary>
 public enum AudioType
 {
     BGM,
@@ -9,41 +12,45 @@ public enum AudioType
     OTHERS,
 }
 
+/// <summary>
+/// ã‚µã‚¦ãƒ³ãƒ‰ã®æƒ…å ±ã‚’æ ¼ç´ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹
+/// ã‚µã‚¦ãƒ³ãƒ‰ã®ç¨®é¡ã€ã‚¯ãƒªãƒƒãƒ—ãƒ•ã‚¡ã‚¤ãƒ«ã€ãƒœãƒªãƒ¥ãƒ¼ãƒ ã€ãƒ«ãƒ¼ãƒ—ã®æœ‰ç„¡ãŒè¨­å®šå¯èƒ½
+/// </summary>
 [Serializable]
 public class AudioInfomation
 {
-    [SerializeField, Header("ƒTƒEƒ“ƒh‚Ìí—Ş")]
+    [SerializeField, Header("ã‚µã‚¦ãƒ³ãƒ‰ã®ç¨®é¡")]
     private AudioType _type = AudioType.BGM;
     /// <summary>
-    /// ƒTƒEƒ“ƒh‚Ìí—Ş
+    /// ã‚µã‚¦ãƒ³ãƒ‰ã®ç¨®é¡
     /// </summary>
     public AudioType Type { get { return _type; } }
 
-    [SerializeField, Header("ƒTƒEƒ“ƒh‚ÌƒNƒŠƒbƒv")]
+    [SerializeField, Header("ã‚µã‚¦ãƒ³ãƒ‰ã®ã‚¯ãƒªãƒƒãƒ—")]
     private AudioClip _clip = null;
     /// <summary>
-    /// ƒTƒEƒ“ƒh‚ÌƒNƒŠƒbƒv
+    /// ã‚µã‚¦ãƒ³ãƒ‰ã®ã‚¯ãƒªãƒƒãƒ—
     /// </summary>
     public AudioClip Clip { get { return _clip; } }
 
-    [SerializeField, Header("ƒTƒEƒ“ƒh‚Ìƒ{ƒŠƒ…[ƒ€"), Range(0.0f, 1.0f)]
+    [SerializeField, Header("ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒœãƒªãƒ¥ãƒ¼ãƒ "), Range(0.0f, 1.0f)]
     private float _volume = 1.0f;
     /// <summary>
-    /// ƒTƒEƒ“ƒh‚Ìƒ{ƒŠƒ…[ƒ€
+    /// ã‚µã‚¦ãƒ³ãƒ‰ã®ãƒœãƒªãƒ¥ãƒ¼ãƒ 
     /// </summary>
     public float Volume { get { return _volume; } }
 
-    [SerializeField, Header("ƒ‹[ƒv‚·‚é‚©")]
+    [SerializeField, Header("ãƒ«ãƒ¼ãƒ—ã™ã‚‹ã‹")]
     private bool _loop = false;
     /// <summary>
-    /// ƒ‹[ƒv‚·‚é‚©
+    /// ãƒ«ãƒ¼ãƒ—ã™ã‚‹ã‹
     /// </summary>
     public bool Loop { get { return _loop; } }
 
-    [SerializeField, Header("Ä¶‚ÌƒIƒtƒZƒbƒg"), Range(0.0f, 1.0f)]
+    [SerializeField, Header("å†ç”Ÿã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ"), Range(0.0f, 1.0f)]
     private float _ofset = 0f;
     /// <summary>
-    /// Ä¶‚ÌƒIƒtƒZƒbƒg
+    /// å†ç”Ÿã®ã‚ªãƒ•ã‚»ãƒƒãƒˆ
     /// </summary>
     public float Ofset { get { return _ofset; } }
 }

@@ -2,6 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// インベントリ画面を制御するクラス
+/// アイテムのしょゆ状態に応じてインベントリ画面の更新を行ったり、インベントリ関連のボタンに設定する用の関数を担当している
+/// </summary>
 public class ItemUIManager : MonoBehaviour
 {
     [SerializeField, Header("インベントリ画面の親")]

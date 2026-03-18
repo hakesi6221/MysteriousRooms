@@ -1,9 +1,19 @@
 using UnityEngine;
 
-public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObjBase
+/// <summary>
+/// 仮想オブジェクトあり
+/// インタラクト時、指定したフラグ状況に応じたテキストを表示するタイプのオブジェクト制御クラス
+/// InteractiveObjTextBaseと同じようなつくりになっているが、Inspectorで指定したフラグに応じて再生するテキストが切り替わる
+/// フラグがオンになった後のテキストは、一度のみ再生されるかどうかを設定可能
+/// </summary>
+public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObj
 {
-    // イベントを渡すか
-    virtual protected bool _isAfterEvent{ get; private set; } = false;
+    /// <summary>
+    /// テキスト終了後にイベントが発生するか
+    /// デフォルトではfalse
+    /// 継承して実装する必要あり
+    /// </summary>
+    protected virtual bool _isAfterEvent{ get; private set; } = false;
 
     [SerializeField, Header("フラグオン後のテキストは一度のみか")]
     private bool _isOnce = false;
@@ -20,11 +30,24 @@ public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObjBas
     // すでに一度フラグオンの状態を見ているか
     private bool _hasOn = false;
 
-    virtual protected void TextAfterEvent()
+
+    /// <summary>
+    /// フラグオフ時、テキスト表示後に呼ばれる処理
+    /// デフォルトでは処理がない
+    /// 継承して実装する必要あり
+    /// </summary>
+
+    protected virtual void TextAfterEvent()
     {
         Debug.Log("処理なし");
         return;
     }
+
+    /// <summary>
+    /// フラグオン時、テキスト表示後に呼ばれる処理
+    /// デフォルトでは処理がない
+    /// 継承して実装する必要あり
+    /// </summary>
 
     protected virtual void OnFlagTextAfterEvent()
     {
@@ -34,7 +57,8 @@ public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObjBas
 
     public void OnIntractEvent()
     {
-        // フラグがオンじゃない場合、元のテキストを再生
+        // フラグに応じて、再生するテキストを変更
+        // 再生部分はInteractiveObjTextBaseと同じ
         if (!FlagManager.Instance.Flags.GetFlagValue(_flagType) || (_isOnce && _hasOn))
         {
             if (_isAfterEvent)

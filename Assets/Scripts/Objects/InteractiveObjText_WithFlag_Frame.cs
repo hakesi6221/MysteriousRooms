@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// 絵画のオブジェクトを制御するクラス
+/// InteractiveObjText_WithFlagBaseを継承
+/// フラグがオンの時に、絵画が外れるイベントが発生する
+/// </summary>
 public class InteractiveObjText_WithFlag_Frame : InteractiveObjText_WithFlagBase
 {
     protected override bool _isAfterEvent => true;

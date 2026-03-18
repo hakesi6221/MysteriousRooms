@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// テレビにリモコンのアイテムクラス
+/// 調べた時にフラグがオンになるのは汎用クラスと共通
+/// インベントリで調べた時に、テキスト再生後、
+/// </summary>
 public class Item_TVRemote : ItemBase
 {
     [SerializeField, Header("モニターをつけるときのテキスト")]
@@ -22,12 +27,23 @@ public class Item_TVRemote : ItemBase
 
     public override void OnAfterCheckEvent()
     {
-        if (_monitor == null) return;
+        // 投影するモニターのCanvasがInspectorで設定されていない場合のnullチェック
+        if (_monitor == null)
+        {
+            Debug.LogError($"{this.name}：モニターに投影するcanvasがアタッチされていません。Inspectorを確認してください。");
+            return;
+        }
 
+        // すでにモニターをつけていれば、もう付けない
         if (_monitor.activeSelf) return;
+        // テキストを再生後、モニターをつける
         EventManager.Instance.OnStartEventText(_monitorTexts, TurnOnMonitor);
     }
 
+    /// <summary>
+    /// モニターをつける処理
+    /// モニターの画面にRenderTextureとして張り付けているcanvasのアクティブをオンにする
+    /// </summary>
     private void TurnOnMonitor()
     {
         SoundManager.Instance.PlaySE(7);

@@ -1,5 +1,9 @@
 using UnityEngine;
 
+/// <summary>
+/// マウスカーソルのアイコンを管理するシングルトンクラス
+/// Inspectorで指定したアイコンをもとに、関数で指示されたアイコンに変更する役割を持つ
+/// </summary>
 public class CursorManager : SingletonMonoBehaviour<CursorManager>
 {
     protected override bool dontDestroyOnLoad => false;

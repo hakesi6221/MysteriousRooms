@@ -4,33 +4,38 @@ using System;
 using System.Threading;
 using DG.Tweening;
 
+/// <summary>
+///  ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼æ“ä½œã«ã‚ˆã‚‹ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹å¤‰æ›´å‡¦ç†ã‚’æ‹…å½“ã™ã‚‹ã‚¯ãƒ©ã‚¹
+/// è¦–ç‚¹å¤‰æ›´ã«ç”¨ã„ã‚‹å¾…æ©Ÿå¯èƒ½ãªéåŒæœŸå‡¦ç†ã‚’æŒã£ã¦ã„ã‚‹
+/// åŸºæœ¬çš„ã«EventManagerã‚’é€šã—ã¦èª­ã‚“ã§ã„ã‚‹
+/// </summary>
 public class CameraMove : MonoBehaviour
 {
-    [SerializeField, Header("ƒfƒtƒHƒ‹ƒg‚ÌƒJƒƒ‰‚ÌÀ•WFunit")]
+    [SerializeField, Header("ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚«ãƒ¡ãƒ©ã®åº§æ¨™ï¼šunit")]
     private Vector3 _defaultPos = Vector3.zero;
 
-    [SerializeField, Header("ƒfƒtƒHƒ‹ƒg‚ÌƒJƒƒ‰‚ÌŒü‚«FƒIƒCƒ‰[Šp")]
+    [SerializeField, Header("ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚«ãƒ¡ãƒ©ã®å‘ãï¼šã‚ªã‚¤ãƒ©ãƒ¼è§’")]
     private Vector3 _defaultAngle = Vector3.zero;
 
-    [SerializeField, Header("ƒJƒƒ‰‚Ì‹“_•ÏXŠ—vŠÔF•b")]
+    [SerializeField, Header("ã‚«ãƒ¡ãƒ©ã®è¦–ç‚¹å¤‰æ›´æ‰€è¦æ™‚é–“ï¼šç§’")]
     private float _changeDiractionSec = 0.5f;
 
-    // ‰ñ“]‚à‚µ‚­‚ÍˆÚ“®’†‚©
+    // å›è»¢ã‚‚ã—ãã¯ç§»å‹•ä¸­ã‹
     private bool _isProcessing = false;
 
-    // ƒIƒuƒWƒFƒNƒg‚Ì’–Ú’†‚©
+    // ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ³¨ç›®ä¸­ã‹
     private bool _isFocusing = false;
 
-    // Œ»İ‚Ì’Êí‚ÌYRoatation
+    // ç¾åœ¨ã®é€šå¸¸æ™‚ã®YRoatation
     private float _currentYAngle = 0f;
 
-    // ƒLƒƒƒ“ƒZƒ‹ƒ\[ƒX
+    // ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã‚½ãƒ¼ã‚¹
     private CancellationTokenSource _cts = new CancellationTokenSource();
 
     /// <summary>
-    /// ‹“_•ûŒü‚Ì•ÏX‚ğƒLƒƒƒ“ƒZƒ‹
+    /// è¦–ç‚¹æ–¹å‘ã®å¤‰æ›´ã‚’ã‚­ãƒ£ãƒ³ã‚»ãƒ«
     /// </summary>
-    /// <param name="camera">“®‚©‚·ƒJƒƒ‰</param>
+    /// <param name="camera">å‹•ã‹ã™ã‚«ãƒ¡ãƒ©</param>
     /// <param name="token"></param>
     /// <returns></returns>
     public async UniTask OnCancelRotateCamera(Camera camera, CancellationToken token)
@@ -48,6 +53,7 @@ public class CameraMove : MonoBehaviour
         catch (OperationCanceledException)
         {
             _isProcessing = false;
+            Debug.LogWarning("è¦–ç‚¹å¤‰æ›´ãŒã‚­ãƒ£ãƒ³ã‚»ãƒ«ã•ã‚Œã¾ã—ãŸ");
             return;
         }
 
@@ -56,9 +62,9 @@ public class CameraMove : MonoBehaviour
     }
 
     /// <summary>
-    /// ’ÊíA‹“_‚ğ‰E‚É‚É•ÏX
+    /// é€šå¸¸æ™‚ã€è¦–ç‚¹ã‚’å³ã«ã«å¤‰æ›´
     /// </summary>
-    /// <param name="camera">“®‚©‚·ƒJƒƒ‰</param>
+    /// <param name="camera">å‹•ã‹ã™ã‚«ãƒ¡ãƒ©</param>
     /// <param name="token"></param>
     /// <returns></returns>
     public async UniTask OnChangeLookDiractionToRight(Camera camera, CancellationToken token)
@@ -82,6 +88,7 @@ public class CameraMove : MonoBehaviour
         catch (OperationCanceledException)
         {
             _cts = new CancellationTokenSource();
+            Debug.LogWarning("è¦–ç‚¹å¤‰æ›´ãŒã‚­ãƒ£ãƒ³ã‚»ãƒ«ã•ã‚Œã¾ã—ãŸ");
             return;
         }
 
@@ -90,9 +97,9 @@ public class CameraMove : MonoBehaviour
     }
 
     /// <summary>
-    /// ’ÊíA‹“_‚ğ¶‚É•ÏX
+    /// é€šå¸¸æ™‚ã€è¦–ç‚¹ã‚’å·¦ã«å¤‰æ›´
     /// </summary>
-    /// <param name="camera">“®‚©‚·ƒJƒƒ‰</param>
+    /// <param name="camera">å‹•ã‹ã™ã‚«ãƒ¡ãƒ©</param>
     /// <param name="token"></param>
     /// <returns></returns>
     public async UniTask OnChangeLookDiractionToLeft(Camera camera, CancellationToken token)
@@ -116,6 +123,7 @@ public class CameraMove : MonoBehaviour
         catch (OperationCanceledException)
         {
             _cts = new CancellationTokenSource();
+            Debug.LogWarning("è¦–ç‚¹å¤‰æ›´ãŒã‚­ãƒ£ãƒ³ã‚»ãƒ«ã•ã‚Œã¾ã—ãŸ");
             return;
         }
 
@@ -124,10 +132,10 @@ public class CameraMove : MonoBehaviour
     }
 
     /// <summary>
-    /// ‘ÎÛ‚Ìtransform‚ÉÀ•W‚Æ‰ñ“]‚ğ‡‚í‚¹‚é
+    /// å¯¾è±¡ã®transformã«åº§æ¨™ã¨å›è»¢ã‚’åˆã‚ã›ã‚‹
     /// </summary>
-    /// <param name="camera">“®‚©‚·ƒJƒƒ‰</param>
-    /// <param name="focusObj">’‹‘ÎÛ</param>
+    /// <param name="camera">å‹•ã‹ã™ã‚«ãƒ¡ãƒ©</param>
+    /// <param name="focusObj">æ³¨è¦–å¯¾è±¡</param>
     public void OnFocusToAnyObject(Camera camera, Transform focusObj)
     {
         if (_isProcessing) return;
@@ -141,9 +149,9 @@ public class CameraMove : MonoBehaviour
     }
 
     /// <summary>
-    /// ’Êíó‘Ô‚É–ß‚é
+    /// é€šå¸¸çŠ¶æ…‹ã«æˆ»ã‚‹
     /// </summary>
-    /// <param name="camera">“®‚©‚·ƒJƒƒ‰</param>
+    /// <param name="camera">å‹•ã‹ã™ã‚«ãƒ¡ãƒ©</param>
     public void OnStopFocus(Camera camera)
     {
         if (_isProcessing) return;

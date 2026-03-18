@@ -5,40 +5,49 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Audio;
 
+/// <summary>
+/// ゲーム内のサウンドを管理するクラス（シングルトンパターン）
+/// Inspectorを通してサウンドの情報クラスを保持し、それらの配列番号でサウンドを呼び出す
+/// フェードをしながらの再生や停止が可能
+/// AudioMixerを用いてサウンドの調整が可能（サウンド更新の処理は外部で作成する必要あり）
+///
+/// 他プロジェクトでも利用できるようにしたいため、環境に依存しないよう待機処理をコルーチンで実装
+/// </summary>
 [DefaultExecutionOrder(-90)]
 public class SoundManager : MonoBehaviour
 {
-    #region private�I�u�W�F�N�g
-    [SerializeField, Header("BGM���X�g")]
-    private List<AudioInfomation> _bgmList = new List<AudioInfomation>();
+    #region privateオブジェクト
+    [SerializeField, Header("BGMリスト")]
+    private AudioInfomation[] _bgmList = null;
 
-    [SerializeField, Header("SE���X�g")]
-    private List<AudioInfomation> _seList = new List<AudioInfomation>();
+    [SerializeField, Header("SEリスト")]
+    private AudioInfomation[] _seList = null;
 
-    [SerializeField, Header("�{�C�X���X�g")]
-    private List<AudioInfomation> _voiceList = new List<AudioInfomation>();
+    [SerializeField, Header("ボイスリスト")]
+    private AudioInfomation[] _voiceList = null;
 
-    [SerializeField, Header("���̑��̉����X�g")]
-    private List<AudioInfomation> _othersList = new List<AudioInfomation>();
+    [SerializeField, Header("その他の音リスト")]
+    private AudioInfomation[] _othersList = null;
 
-    [SerializeField, Header("�e�~�L�T�[")]
+    [SerializeField, Header("親ミキサー")]
     private AudioMixer _mixer;
 
-    [SerializeField, Header("BGM�~�L�T�[")]
+    [SerializeField, Header("BGMミキサー")]
     private AudioMixerGroup _bgmMixier;
 
-    [SerializeField, Header("SE�~�L�T�[")]
+    [SerializeField, Header("SEミキサー")]
     private AudioMixerGroup _seMixier;
 
-    [SerializeField, Header("Voice�~�L�T�[")]
+    [SerializeField, Header("Voiceミキサー")]
     private AudioMixerGroup _voiceMixier;
 
-    [SerializeField, Header("���̑��~�L�T�[")]
+    [SerializeField, Header("その他ミキサー")]
     private AudioMixerGroup _othersMixier;
 
-    [SerializeField, Header("�f�t�H���g�t�F�[�h����"), Range(0.0f, 5.0f)]
+    [SerializeField, Header("デフォルトフェード時間"), Range(0.0f, 5.0f)]
     private float _defaultFadeRate = 0.0f;
 
+    // 各音カテゴリのAudioSourceのリスト
     private List<AudioSource> _bgmSource = new List<AudioSource>();
     private List<AudioSource> _seSource = new List<AudioSource>();
     private List<AudioSource> _voiceSource = new List<AudioSource>();
@@ -47,7 +56,7 @@ public class SoundManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        // �e���̃��X�g��������
+        // 各音のリストを初期化
         _bgmSource = new List<AudioSource>();
         _seSource = new List<AudioSource>();
         _voiceSource = new List<AudioSource>();
@@ -74,6 +83,12 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 事前にすべての音分のAudioSourceを用意する
+    /// サウンド呼び出すたびにAudioSourceのつけ外しが発生しないようにするため
+    /// </summary>
+    /// <param name="audio"></param>
+    /// <returns></returns>
     private AudioSource CreateNewAudioSource(AudioInfomation audio)
     {
         AudioSource newSource = gameObject.AddComponent<AudioSource>();
@@ -98,9 +113,9 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�I�����̌�n������
+    /// サウンド終了時の後始末処理
     /// </summary>
-    /// <param name="source">�Ď�������AudioSource</param>
+    /// <param name="source">監視したいAudioSource</param>
     /// <returns></returns>
     private IEnumerator FinishSoundProcess(AudioSource source)
     {
@@ -115,10 +130,10 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�����ۂɖ炷
+    /// サウンドを実際に鳴らす
     /// </summary>
-    /// <param name="source">�炷�\�[�X</param>
-    /// <param name="audio">�炷���̏��</param>
+    /// <param name="source">鳴らすソース</param>
+    /// <param name="audio">鳴らす音の情報</param>
     private void OnPlaySound(AudioSource source, AudioInfomation audio)
     {
         source.clip = audio.Clip;
@@ -131,21 +146,21 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�̈ꎞ��~����
+    /// サウンドの一時停止解除
     /// </summary>
-    /// <param name="source">�����������\�[�X</param>
+    /// <param name="source">解除したいソース</param>
     private void OnUnPauseSound(AudioSource source)
     {
         source.UnPause();
     }
 
     /// <summary>
-    /// �T�E���h�̈ꎞ��~����
-    /// �t�F�[�h�C������
+    /// サウンドの一時停止解除
+    /// フェードインあり
     /// </summary>
-    /// <param name="source">�����������\�[�X</param>
-    /// <param name="endVolume">�ŏI�I�ȃ{�����[��</param>
-    /// <param name="fadeTime">�t�F�[�h�̎���</param>
+    /// <param name="source">解除したいソース</param>
+    /// <param name="endVolume">最終的なボリューム</param>
+    /// <param name="fadeTime">フェードの時間</param>
     private void OnUnPauseSoundWithFadeIn(AudioSource source, float endVolume, float fadeTime)
     {
         source.UnPause();
@@ -153,14 +168,14 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�����ۂɖ炷
-    /// �t�F�[�h�C������
+    /// サウンドを実際に鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="source">�炷�\�[�X</param>
-    /// <param name="audio">�炷���̏��</param>
-    /// <param name="startVolume">�ŏ��̃{�����[��</param>
-    /// <param name="endVolume">�ŏI�I�ȃ{�����[��</param>
-    /// <param name="fadeTime">�t�F�[�h�̎���</param>
+    /// <param name="source">鳴らすソース</param>
+    /// <param name="audio">鳴らす音の情報</param>
+    /// <param name="startVolume">最初のボリューム</param>
+    /// <param name="endVolume">最終的なボリューム</param>
+    /// <param name="fadeTime">フェードの時間</param>
     private void OnPlaySoundWithFadeIn(AudioSource source, AudioInfomation audio, float startVolume, float endVolume, float fadeTime)
     {
         source.clip = audio.Clip;
@@ -174,9 +189,9 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�𒼐ڎ~�߂�
+    /// サウンドを直接止める
     /// </summary>
-    /// <param name="source">�炷�\�[�X</param>
+    /// <param name="source">鳴らすソース</param>
     private void OnStopSound(AudioSource source)
     {
         source.Stop();
@@ -187,13 +202,13 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�𒼐ڎ~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// サウンドを直接止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="source">�~�߂�\�[�X</param>
-    /// <param name="audio">�~�߂鉹�̏��</param>
-    /// <param name="endVolume">�ŏI�I�ȃ{�����[��</param>
-    /// <param name="fadeTime">�t�F�[�h�̎���</param>
+    /// <param name="source">止めるソース</param>
+    /// <param name="audio">止める音の情報</param>
+    /// <param name="endVolume">最終的なボリューム</param>
+    /// <param name="fadeTime">フェードの時間</param>
     private IEnumerator OnStopSoundWithFadeOut(AudioSource source, AudioInfomation audio, float endVolume, float fadeTime)
     {
         yield return StartCoroutine(FadeMoveSound(audio, fadeTime, endVolume));
@@ -206,21 +221,21 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�̈ꎞ��~
+    /// サウンドの一時停止
     /// </summary>
-    /// <param name="source">�����������\�[�X</param>
+    /// <param name="source">解除したいソース</param>
     private void OnPauseSound(AudioSource source)
     {
         source.Pause();
     }
 
     /// <summary>
-    /// �T�E���h�̈ꎞ��~
-    /// �t�F�[�h�A�E�g����
+    /// サウンドの一時停止
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="source">�����������\�[�X</param>
-    /// <param name="endVolume">�ŏI�I�ȃ{�����[��</param>
-    /// <param name="fadeTime">�t�F�[�h�̎���</param>
+    /// <param name="source">解除したいソース</param>
+    /// <param name="endVolume">最終的なボリューム</param>
+    /// <param name="fadeTime">フェードの時間</param>
     private IEnumerator OnPauseSoundWithFadeOut(AudioSource source, float endVolume, float fadeTime)
     {
         yield return StartCoroutine(FadeMoveSound(source, fadeTime, endVolume));
@@ -228,15 +243,15 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �T�E���h�̃^�C�v�ŏ������Ă���AudioSource�̃��X�g�����
+    /// サウンドのタイプで所属しているAudioSourceのリストを特定
     /// </summary>
-    /// <param name="type">���ׂ�������AudioType</param>
+    /// <param name="type">調べたい音のAudioType</param>
     /// <returns></returns>
     private List<AudioSource> SearchSourceListByAudioType(AudioType type)
     {
         List<AudioSource> sources = new List<AudioSource>();
 
-        // �w�肳�ꂽ���̃^�C�v�ɂ���ă\�[�X�̃��X�g������
+        // 指定された音のタイプによってソースのリストを決定
         switch (type)
         {
             case AudioType.BGM:
@@ -259,10 +274,10 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ���ݍĐ����ł͂Ȃ�AudioSource�����X�g�̒����猟��
-    /// ���ׂĖ��܂��Ă����ꍇ�A�V�������̂����
+    /// 現在再生中ではないAudioSourceをリストの中から検索
+    /// すべて埋まっていた場合、新しいものを作る
     /// </summary>
-    /// <param name="sources">����������AudioSource�̃��X�g</param>
+    /// <param name="sources">検索したいAudioSourceのリスト</param>
     /// <returns></returns>
     private AudioSource SearchEmptySource(List<AudioSource> sources)
     {
@@ -279,10 +294,10 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w�肵��AudioClip���Đ����Ă���AudioSource�����X�g�̒����猟��
+    /// 指定したAudioClipを再生しているAudioSourceをリストの中から検索
     /// </summary>
-    /// <param name="sources">����������AudioSource�̃��X�g</param>
-    /// <param name="clip">����������AudioClip</param>
+    /// <param name="sources">検索したいAudioSourceのリスト</param>
+    /// <param name="clip">検索したいAudioClip</param>
     /// <returns></returns>
     private AudioSource SearchSourceByClip(List<AudioSource> sources, AudioClip clip)
     {
@@ -296,23 +311,23 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w�肵���T�E���h���t�F�[�h���ĉ��ʂ��ړ�
+    /// 指定したサウンドをフェードして音量を移動
     /// </summary>
-    /// <param name="audio">�t�F�[�h��������</param>
-    /// <param name="fadeOutSec">�t�F�[�h����</param>
-    /// <param name="volume">�t�F�[�h��̉���</param>
+    /// <param name="audio">フェードしたい音</param>
+    /// <param name="fadeOutSec">フェード時間</param>
+    /// <param name="volume">フェード後の音量</param>
     /// <returns></returns>
     private IEnumerator FadeMoveSound(AudioInfomation audio, float fadeOutSec, float volume)
     {
         if (audio == null) yield break;
 
-        // �����Ă���AudioSource������
+        // 属しているAudioSourceを検索
         List<AudioSource> sources = SearchSourceListByAudioType(audio.Type);
         if (sources == null) yield break;
         AudioSource source = SearchSourceByClip(sources, audio.Clip);
         if (source == null) yield break;
 
-        // �ω���̉��ʂ����ƂƓ����A�K�v�Ȃ��̂�
+        // 変化後の音量がもとと同じ、必要ないので
         if (volume == source.volume) yield break;
 
         if (fadeOutSec > 0f)
@@ -332,17 +347,17 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �w�肵���T�E���h���t�F�[�h���ĉ��ʂ��ړ�
+    /// 指定したサウンドをフェードして音量を移動
     /// </summary>
-    /// <param name="audio">�t�F�[�h��������</param>
-    /// <param name="fadeOutSec">�t�F�[�h����</param>
-    /// <param name="volume">�t�F�[�h��̉���</param>
+    /// <param name="audio">フェードしたい音</param>
+    /// <param name="fadeOutSec">フェード時間</param>
+    /// <param name="volume">フェード後の音量</param>
     /// <returns></returns>
     private IEnumerator FadeMoveSound(AudioSource source, float fadeOutSec, float volume)
     {
         if (source == null) yield break;
 
-        // �ω���̉��ʂ����ƂƓ����A�K�v�Ȃ��̂�
+        // 変化後の音量がもとと同じ、必要ないので
         if (volume == source.volume) yield break;
 
         if (fadeOutSec > 0f)
@@ -362,21 +377,21 @@ public class SoundManager : MonoBehaviour
     }
     #endregion
 
-    #region �p�����[�^�֌W
+    #region パラメータ関係
 
-    // AudioMixer�`�����l���̍Œ�l
+    // AudioMixerチャンネルの最低値
     public const float MIXER_MIN_VALUE = -80.0f;
 
     /// <summary>
-    /// BGM�̃{�����[����ݒ�
+    /// BGMのボリュームを設定
     /// </summary>
-    /// <param name="volume">�V�����{�����[��</param>
+    /// <param name="volume">新しいボリューム</param>
     public void SetBGMVolume(float volume)
     {
         _mixer.SetFloat("BGM", volume);
     }
     /// <summary>
-    /// BGM�̃{�����[��
+    /// BGMのボリューム
     /// </summary>
     public float GetBGMVolume
     {
@@ -391,15 +406,15 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// SE�̃{�����[����ݒ�
+    /// SEのボリュームを設定
     /// </summary>
-    /// <param name="volume">�V�����{�����[��</param>
+    /// <param name="volume">新しいボリューム</param>
     public void SetSEVolume(float volume)
     {
         _mixer.SetFloat("SE", volume);
     }
     /// <summary>
-    /// SE�̃{�����[��
+    /// SEのボリューム
     /// </summary>
     public float GetSEVolume
     {
@@ -414,15 +429,15 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// �{�C�X�̃{�����[����ݒ�
+    /// ボイスのボリュームを設定
     /// </summary>
-    /// <param name="volume">�V�����{�����[��</param>
+    /// <param name="volume">新しいボリューム</param>
     public void SetVoiceVolume(float volume)
     {
         _mixer.SetFloat("Voice", volume);
     }
     /// <summary>
-    /// �{�C�X�̃{�����[��
+    /// ボイスのボリューム
     /// </summary>
     public float GetVoiceVolume
     {
@@ -437,15 +452,15 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ���̑��̃{�����[����ݒ�
+    /// その他のボリュームを設定
     /// </summary>
-    /// <param name="volume">�V�����{�����[��</param>
+    /// <param name="volume">新しいボリューム</param>
     public void SetOthersVolume(float volume)
     {
         _mixer.SetFloat("Others", volume);
     }
     /// <summary>
-    /// ���̑��̃{�����[��
+    /// その他のボリューム
     /// </summary>
     public float GetOthersVolume
     {
@@ -460,7 +475,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// BGM�~���[�g����
+    /// BGMミュート解除
     /// </summary>
     public void OnBGM()
     {
@@ -470,7 +485,7 @@ public class SoundManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// BGM�~���[�g
+    /// BGMミュート
     /// </summary>
     public void OffBGM()
     {
@@ -481,7 +496,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// SE�~���[�g����
+    /// SEミュート解除
     /// </summary>
     public void OnSE()
     {
@@ -491,7 +506,7 @@ public class SoundManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// SE�~���[�g
+    /// SEミュート
     /// </summary>
     public void OffSE()
     {
@@ -502,7 +517,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Voice�~���[�g����
+    /// Voiceミュート解除
     /// </summary>
     public void OnVoice()
     {
@@ -512,7 +527,7 @@ public class SoundManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// Voice�~���[�g
+    /// Voiceミュート
     /// </summary>
     public void OffVoice()
     {
@@ -523,7 +538,7 @@ public class SoundManager : MonoBehaviour
     }
 
     /// <summary>
-    /// ���̑��~���[�g����
+    /// その他ミュート解除
     /// </summary>
     public void OnOthers()
     {
@@ -533,7 +548,7 @@ public class SoundManager : MonoBehaviour
         }
     }
     /// <summary>
-    /// ���̑��~���[�g
+    /// その他ミュート
     /// </summary>
     public void OffOthers()
     {
@@ -544,905 +559,1582 @@ public class SoundManager : MonoBehaviour
     }
     #endregion
 
-    #region BGM����
+    #region BGM操作
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM��炷
+    /// 指定したインデックスのBGMを鳴らす
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
-    public void PlayBGM(int index)   // ���ʉ���炷(�P��)
+    /// <param name="index">BGMのインデックス</param>
+    public void PlayBGM(int index)   // 効果音を鳴らす(単発)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
-        AudioSource source = SearchEmptySource(_bgmSource);
-        if (source == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
 
+        // 空いているBGMのAudioSourceを探してくる
+        AudioSource source = SearchEmptySource(_bgmSource);
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
+
+        // 音を鳴らす
         OnPlaySound(source, audio);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのBGMを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void PlayBGMWithFadeIn(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
+        // 空いているBGMのAudioSourceを探してくる
         AudioSource source = SearchEmptySource(_bgmSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, 0f, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのBGMを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void PlayBGMWithFadeIn(int index, float startVolume, float endVolume, float fadeInSec)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
+        // 空いているBGMのAudioSourceを探してくる
         AudioSource source = SearchEmptySource(_bgmSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, startVolume, endVolume, fadeInSec);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XBGM���~�߂�
+    /// 指定したインデックスBGMを止める
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void StopBGM(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnStopSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XBGM���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスBGMを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void StopBGMWithFadeOut(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XBGM���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスBGMを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void StopBGMWithFadeOut(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void PauseBGM(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void PauseBGMWithFadeOut(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void PauseBGMWithFadeOut(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, endVolume, fadeOutTime));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void UnPauseBGM(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void UnPauseBGMWithFadeIn(int index)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+        if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��BGM���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのBGMを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">BGM�̃C���f�b�N�X</param>
+    /// <param name="index">BGMのインデックス</param>
     public void UnPauseBGMWithFadeIn(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+                if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, endVolume, fadeOutTime);
     }
 
     /// <summary>
-    /// �w�肵��BGM�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したBGMのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������BGM�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいBGMのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeBGMByIndex(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+                if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, fadeOutSec, endVolume));
     }
 
     /// <summary>
-    /// �w�肵��BGM�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したBGMのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������BGM�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいBGMのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeBGMByIndex(int index, float endVolume)
     {
-        if (index < 0 || _bgmList.Count <= index) return;
+                if (index < 0 || _bgmList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioInfomation audio = _bgmList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = BGM, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_bgmSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, _defaultFadeRate, endVolume));
     }
     #endregion
 
-    #region SE����
+    #region SE操作
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE��炷
+    /// 指定したインデックスのSEを鳴らす
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
-    public void PlaySE(int index)   // ���ʉ���炷(�P��)
+    /// <param name="index">SEのインデックス</param>
+    public void PlaySE(int index)   // 効果音を鳴らす(単発)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_seSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySound(source, audio);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのSEを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void PlaySEWithFadeIn(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_seSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, 0f, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのSEを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void PlaySEWithFadeIn(int index, float startVolume, float endVolume, float fadeInSec)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_seSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, startVolume, endVolume, fadeInSec);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XSE���~�߂�
+    /// 指定したインデックスSEを止める
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void StopSE(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnStopSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XSE���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスSEを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void StopSEWithFadeOut(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XSE���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスSEを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void StopSEWithFadeOut(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void PauseSE(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void PauseSEWithFadeOut(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void PauseSEWithFadeOut(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, endVolume, fadeOutTime));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void UnPauseSE(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void UnPauseSEWithFadeIn(int index)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��SE���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのSEを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">SE�̃C���f�b�N�X</param>
+    /// <param name="index">SEのインデックス</param>
     public void UnPauseSEWithFadeIn(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, endVolume, fadeOutTime);
     }
 
     /// <summary>
-    /// �w�肵��SE�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したSEのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������SE�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいSEのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeSEByIndex(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, fadeOutSec, endVolume));
     }
 
     /// <summary>
-    /// �w�肵��SE�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したSEのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������SE�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいSEのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeSEByIndex(int index, float endVolume)
     {
-        if (index < 0 || _seList.Count <= index) return;
+        if (index < 0 || _seList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _seList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = SE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_seSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, _defaultFadeRate, endVolume));
     }
     #endregion
 
-    #region VOICE����
+    #region VOICE操作
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice��炷
+    /// 指定したインデックスのVoiceを鳴らす
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
-    public void PlayVoice(int index)   // ���ʉ���炷(�P��)
+    /// <param name="index">Voiceのインデックス</param>
+    public void PlayVoice(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_voiceSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySound(source, audio);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのVoiceを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void PlayVoiceWithFadeIn(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_voiceSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, 0f, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice��炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのVoiceを鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void PlayVoiceWithFadeIn(int index, float startVolume, float endVolume, float fadeInSec)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_voiceSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, startVolume, endVolume, fadeInSec);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XVoice���~�߂�
+    /// 指定したインデックスVoiceを止める
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void StopVoice(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnStopSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XVoice���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスVoiceを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void StopVoiceWithFadeOut(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�XVoice���~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスVoiceを止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void StopVoiceWithFadeOut(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void PauseVoice(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void PauseVoiceWithFadeOut(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void PauseVoiceWithFadeOut(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, endVolume, fadeOutTime));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void UnPauseVoice(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void UnPauseVoiceWithFadeIn(int index)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X��Voice���ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのVoiceを一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">Voice�̃C���f�b�N�X</param>
+    /// <param name="index">Voiceのインデックス</param>
     public void UnPauseVoiceWithFadeIn(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, endVolume, fadeOutTime);
     }
 
     /// <summary>
-    /// �w�肵��Voice�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したVoiceのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������Voice�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいVoiceのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeVoiceByIndex(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, fadeOutSec, endVolume));
     }
 
     /// <summary>
-    /// �w�肵��Voice�̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したVoiceのボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX������Voice�̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいVoiceのインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeVoiceByIndex(int index, float endVolume)
     {
-        if (index < 0 || _voiceList.Count <= index) return;
+        if (index < 0 || _voiceList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioInfomation audio = _voiceList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = VOICE, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_voiceSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, _defaultFadeRate, endVolume));
     }
     #endregion
 
-    #region OTHERS����
+    #region OTHERS操作
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉���炷
+    /// 指定したインデックスのその他の音を鳴らす
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
-    public void PlayOthers(int index)   // ���ʉ���炷(�P��)
+    /// <param name="index">その他の音のインデックス</param>
+    public void PlayOthers(int index)   // 効果音を鳴らす(単発)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_othersSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySound(source, audio);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉���炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのその他の音を鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void PlayOthersWithFadeIn(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_othersSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, 0f, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉���炷
-    /// �t�F�[�h�C������
+    /// 指定したインデックスのその他の音を鳴らす
+    /// フェードインあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void PlayOthersWithFadeIn(int index, float startVolume, float endVolume, float fadeInSec)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchEmptySource(_othersSource);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogError($"SoundManager：現在再生していないAudioSOurceがありませんでした。生成しているAudioSourceとサウンド情報の数があっていない可能性があります。処理を確認してください。");
+            return;
+        }
 
         OnPlaySoundWithFadeIn(source, audio, startVolume, endVolume, fadeInSec);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X���̑��̉����~�߂�
+    /// 指定したインデックスその他の音を止める
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void StopOthers(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnStopSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X���̑��̉����~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスその他の音を止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void StopOthersWithFadeOut(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X���̑��̉����~�߂�
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスその他の音を止める
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void StopOthersWithFadeOut(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnStopSoundWithFadeOut(source, audio, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void PauseOthers(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void PauseOthersWithFadeOut(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, 0f, _defaultFadeRate));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void PauseOthersWithFadeOut(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(OnPauseSoundWithFadeOut(source, endVolume, fadeOutTime));
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void UnPauseOthers(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSound(source);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void UnPauseOthersWithFadeIn(int index)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, audio.Volume, _defaultFadeRate);
     }
 
     /// <summary>
-    /// �w�肵���C���f�b�N�X�̂��̑��̉����ꎞ��~����
-    /// �t�F�[�h�A�E�g����
+    /// 指定したインデックスのその他の音を一時停止する
+    /// フェードアウトあり
     /// </summary>
-    /// <param name="index">���̑��̉��̃C���f�b�N�X</param>
+    /// <param name="index">その他の音のインデックス</param>
     public void UnPauseOthersWithFadeIn(int index, float endVolume, float fadeOutTime)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         OnUnPauseSoundWithFadeIn(source, endVolume, fadeOutTime);
     }
 
     /// <summary>
-    /// �w�肵�����̑��̉��̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したその他の音のボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX���������̑��̉��̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいその他の音のインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeOthersByIndex(int index, float endVolume, float fadeOutSec)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, fadeOutSec, endVolume));
     }
 
     /// <summary>
-    /// �w�肵�����̑��̉��̃{�����[�����t�F�[�h�ŕύX����
+    /// 指定したその他の音のボリュームをフェードで変更する
     /// </summary>
-    /// <param name="index">�ύX���������̑��̉��̃C���f�b�N�X</param>
-    /// <param name="endVolume">�ύX��̃{�����[��</param>
-    /// <param name="fadeOutSec">�t�F�[�h�̎���</param>
+    /// <param name="index">変更したいその他の音のインデックス</param>
+    /// <param name="endVolume">変更先のボリューム</param>
+    /// <param name="fadeOutSec">フェードの時間</param>
     public void FadeMoveVolumeOthersByIndex(int index, float endVolume)
     {
-        if (index < 0 || _othersList.Count <= index) return;
+        if (index < 0 || _othersList.Length <= index)
+        {
+            Debug.LogWarning($"SoundManager：登録された数より多い番号が指定されました。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioInfomation audio = _othersList[index];
-        if (audio == null) return;
+        if (audio == null)
+        {
+            Debug.LogWarning($"SoundManager：呼び出された番号のサウンドの情報が作成されていません。Inspectorを確認してください。type = OTHERS, value = {index}");
+            return;
+        }
         AudioSource source = SearchSourceByClip(_othersSource, audio.Clip);
-        if (source == null) return;
+        if (source == null)
+        {
+            Debug.LogWarning($"SoundManager：指定されたサウンドは再生されていません。value = {index}");
+            return;
+        }
 
         StartCoroutine(FadeMoveSound(audio, _defaultFadeRate, endVolume));
     }
@@ -1450,20 +2142,43 @@ public class SoundManager : MonoBehaviour
 
 
 
-    #region �V���O���g���p�^�[��
-    public static SoundManager Instance { get; private set; }
+    #region シングルトンパターン
+
+    private static SoundManager _instance = null;
+
+    /// <summary>
+    /// ゲーム内のサウンドを管理するクラス
+    /// </summary>
+    public static SoundManager Instance
+    {
+        get
+        {
+            if (!_instance)
+            {
+                _instance = (SoundManager)FindObjectOfType(typeof(SoundManager));
+                if (!_instance)
+                {
+                    Debug.LogWarning("サウンドマネージャーが存在しないのにアクセスされました。シーン上に配置してください。");
+                }
+            }
+            return _instance;
+        }
+    }
+    #endregion
 
     void Awake()
     {
-        if (Instance == null)
+        // 既に存在しているのであれば破壊し、
+        // ないのであれば自分を非破壊オブジェクトに設定
+        if (_instance == null)
         {
+            // 非破壊オブジェクトに設定
             DontDestroyOnLoad(this.gameObject);
-            Instance = this;
+            _instance = this;
         }
         else
         {
             Destroy(this.gameObject);
         }
     }
-    #endregion
 }

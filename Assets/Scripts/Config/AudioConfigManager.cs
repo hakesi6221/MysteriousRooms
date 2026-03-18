@@ -2,6 +2,10 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 音量設定画面を通しての音量設定を担当するクラス
+/// 音量設定画面の各スライダーにアタッチし、そのスライダーの値が調整された場合、設定したタイプに応じたサウンドの音量を更新する
+/// </summary>
 public class AudioConfigManager : MonoBehaviour
 {
     [SerializeField, Header("音量設定スライダー")]
@@ -15,6 +19,7 @@ public class AudioConfigManager : MonoBehaviour
 
     /// <summary>
     /// スライダーの値を更新したときの処理
+    /// タイプに応じたサウンドの音量を更新する
     /// </summary>
     public void UpdateValue()
     {

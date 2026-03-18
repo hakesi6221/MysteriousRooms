@@ -5,6 +5,11 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using System.Threading;
 
+/// <summary>
+/// プレイヤーの操作によって発生する現象を担当するシングルトンクラス
+/// カメラの視点変更、アイテムを調べる、テキストを再生する
+/// の三つの処理を担当しており、基本的にここからそれらの処理を呼ぶ形
+/// </summary>
 public class EventManager : SingletonMonoBehaviour<EventManager>
 {
     protected override bool dontDestroyOnLoad => false;
@@ -20,9 +25,6 @@ public class EventManager : SingletonMonoBehaviour<EventManager>
 
     [SerializeField, Header("イベントテキストを表示するTMP"), BoxGroup("Text")]
     private TextMeshProUGUI _operateEventTMP = null;
-
-    [SerializeField, Header("イベントテキストの1文字の表示時間：秒"), BoxGroup("Text")]
-    private float _eventTextCharDuration = 0.2f;
 
     [SerializeField, Header("イベントテキストウインドウのフェード時間"), BoxGroup("Text")]
     private float _textWindowFadeSec = 0.5f;
@@ -101,16 +103,16 @@ public class EventManager : SingletonMonoBehaviour<EventManager>
     /// <summary>
     /// カメラの正面方向にRayを放ち、当たって、インタラクトできるオブジェクトだった場合その情報を返す
     /// </summary>
-    public IInteractiveObjBase OnGetObjInfoByRay(Vector3 _tapPos)
+    public IInteractiveObj OnGetObjInfoByRay(Vector3 _tapPos)
     {
-        IInteractiveObjBase objInfo = null;
+        IInteractiveObj objInfo = null;
         Ray ray = _operateCamera.ScreenPointToRay(_tapPos);
         RaycastHit hit;
         Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
 
         if (Physics.Raycast(ray, out hit))
         {
-            objInfo = hit.collider.gameObject.GetComponent<IInteractiveObjBase>();
+            objInfo = hit.collider.gameObject.GetComponent<IInteractiveObj>();
         }
 
         return objInfo;

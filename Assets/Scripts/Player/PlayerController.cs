@@ -3,39 +3,45 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®æ“ä½œã‚’åˆ¶å¾¡ã™ã‚‹ã‚¯ãƒ©ã‚¹
+/// InputSystemã‚’ä½¿ç”¨
+/// å…¥åŠ›ã«å¿œã˜ãŸå‡¦ç†ã‚’å‘¼ã¶
+/// </summary>
 public class PlayerController : MonoBehaviour
 {
     /// <summary>
-    /// ƒJ[ƒ\ƒ‹‚ğ‡‚í‚¹‚½ƒIƒuƒWƒFƒNƒg‚ğ’²‚×‚é
+    /// ã‚«ãƒ¼ã‚½ãƒ«ã‚’åˆã‚ã›ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’èª¿ã¹ã‚‹
     /// </summary>
     /// <param name="context"></param>
     public void OnCheckObject(InputAction.CallbackContext context)
     {
         if (!context.performed) return;
-        // ‘€ìƒXƒe[ƒg‚Å‚Ì‘€ìŠÇ—
+        // æ“ä½œã‚¹ãƒ†ãƒ¼ãƒˆã§ã®æ“ä½œç®¡ç†
         if (MaingameManager.Instance.CurrentOperate != OperateState.Common && MaingameManager.Instance.CurrentOperate != OperateState.Focus) return;
-        // UI‚ÉƒJ[ƒ\ƒ‹‚ª‚ ‚Á‚Ä‚¢‚éê‡A•¨‚Í’²‚×‚ç‚ê‚È‚¢
+        // UIã«ã‚«ãƒ¼ã‚½ãƒ«ãŒã‚ã£ã¦ã„ã‚‹å ´åˆã€ç‰©ã¯èª¿ã¹ã‚‰ã‚Œãªã„
         if (EventSystem.current.IsPointerOverGameObject()) return;
-        // Œ»İ‚Ìƒ|ƒCƒ“ƒ^[‚ğæ“¾‚µA‚Å‚«‚È‚©‚Á‚½‚çÀs‚µ‚È‚¢
+        // ç¾åœ¨ã®ãƒã‚¤ãƒ³ã‚¿ãƒ¼ã‚’å–å¾—ã—ã€ã§ããªã‹ã£ãŸã‚‰å®Ÿè¡Œã—ãªã„
         Pointer pointer = Pointer.current;
         if (pointer == null) return;
 
         Vector3 pointerPos = pointer.position.ReadValue();
-        IInteractiveObjBase tapObj = EventManager.Instance.OnGetObjInfoByRay(pointerPos);
+        IInteractiveObj tapObj = EventManager.Instance.OnGetObjInfoByRay(pointerPos);
 
         if (tapObj == null) return;
-        Debug.Log("ƒCƒxƒ“ƒgƒIƒuƒWƒFƒNƒg‚ğƒ^ƒbƒ`");
+        Debug.Log("ã‚¤ãƒ™ãƒ³ãƒˆã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ã‚¿ãƒƒãƒ");
         tapObj.OnIntractEvent();
         SoundManager.Instance.PlaySE(4);
     }
 
     /// <summary>
-    /// ƒeƒLƒXƒg‚ª•\¦’†‚Ìê‡AƒeƒLƒXƒg‘—‚è‚È‚Ç‚Ìˆ—‚ğs‚¤
+    /// ãƒ†ã‚­ã‚¹ãƒˆãŒè¡¨ç¤ºä¸­ã®å ´åˆã€ãƒ†ã‚­ã‚¹ãƒˆé€ã‚Šãªã©ã®å‡¦ç†ã‚’è¡Œã†
     /// </summary>
     /// <param name="context"></param>
     public void OnNextText(InputAction.CallbackContext context)
     {
         if (context.performed || context.canceled) return;
+        // æ“ä½œã‚¹ãƒ†ãƒ¼ãƒˆã§ã®æ“ä½œç®¡ç†
         if (MaingameManager.Instance.CurrentOperate != OperateState.Text) return;
 
         EventManager.Instance.OnEventTextNextSentence();
@@ -43,7 +49,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒJƒƒ‰‚ğ‰E‚É‰ñ“]
+    /// ã‚«ãƒ¡ãƒ©ã‚’å³ã«å›è»¢
     /// </summary>
     public void DirectionRight()
     {
@@ -51,7 +57,7 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// ƒJƒƒ‰‚ğ¶‚É‰ñ“]
+    /// ã‚«ãƒ¡ãƒ©ã‚’å·¦ã«å›è»¢
     /// </summary>
     public void DirectionLeft()
     {
@@ -59,10 +65,11 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Œ»İ‚Ìƒ|ƒCƒ“ƒ^[‚Ìó‘Ô‚ğæ“¾‚µA‚»‚ê‚É‡‚í‚¹‚ÄƒJ[ƒ\ƒ‹‚ğ•ÏX‚·‚é
+    /// ç¾åœ¨ã®ãƒã‚¤ãƒ³ã‚¿ãƒ¼ã®çŠ¶æ…‹ã‚’å–å¾—ã—ã€ãã‚Œã«åˆã‚ã›ã¦ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¤‰æ›´ã™ã‚‹
     /// </summary>
     private void CheckObjOnPointer()
     {
+        // é€šå¸¸çŠ¶æ…‹
         if (MaingameManager.Instance.CurrentOperate != OperateState.Common && MaingameManager.Instance.CurrentOperate != OperateState.Focus && MaingameManager.Instance.CurrentOperate != OperateState.Text)
         {
             CursorManager.Instance.OnChangeCommonCurSor();
@@ -75,27 +82,27 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Œ»İ‚Ìƒ|ƒCƒ“ƒ^[‚ğæ“¾‚µA‚Å‚«‚È‚©‚Á‚½‚çÀs‚µ‚È‚¢
+        // ç¾åœ¨ã®ãƒã‚¤ãƒ³ã‚¿ãƒ¼ã‚’å–å¾—ã—ã€ã§ããªã‹ã£ãŸã‚‰å®Ÿè¡Œã—ãªã„
         Pointer pointer = Pointer.current;
         if (pointer == null) return;
 
         Vector3 pointerPos = pointer.position.ReadValue();
-        IInteractiveObjBase tapObj = EventManager.Instance.OnGetObjInfoByRay(pointerPos);
+        IInteractiveObj tapObj = EventManager.Instance.OnGetObjInfoByRay(pointerPos);
 
-        // ƒJ[ƒ\ƒ‹‚ğ‡‚í‚¹‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚ª‚È‚¢‚È‚çAƒJ[ƒ\ƒ‹‚ÍƒfƒtƒHƒ‹ƒg‚É
+        // ã‚«ãƒ¼ã‚½ãƒ«ã‚’åˆã‚ã›ã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒãªã„ãªã‚‰ã€ã‚«ãƒ¼ã‚½ãƒ«ã¯ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã«
         if (tapObj == null)
         {
             CursorManager.Instance.OnChangeCommonCurSor();
             return;
         }
-        // UI‚ÉƒJ[ƒ\ƒ‹‚ª‚ ‚Á‚Ä‚¢‚é‚È‚çAƒfƒtƒHƒ‹ƒg‚ÌƒJ[ƒ\ƒ‹‚É
+        // UIã«ã‚«ãƒ¼ã‚½ãƒ«ãŒã‚ã£ã¦ã„ã‚‹ãªã‚‰ã€ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ã‚«ãƒ¼ã‚½ãƒ«ã«
         if (EventSystem.current.IsPointerOverGameObject())
         {
             CursorManager.Instance.OnChangeCommonCurSor();
             return;
         }
 
-        // ƒJ[ƒ\ƒ‹‚ğ‡‚í‚¹‚½ƒIƒuƒWƒFƒNƒg‚Ìí—Ş‚É‚æ‚Á‚ÄƒJ[ƒ\ƒ‹‚ğ•Ï‚¦‚é
+        // ã‚«ãƒ¼ã‚½ãƒ«ã‚’åˆã‚ã›ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç¨®é¡ã«ã‚ˆã£ã¦ã‚«ãƒ¼ã‚½ãƒ«ã‚’å¤‰ãˆã‚‹
         tapObj.UpdateCursor();
     }
 

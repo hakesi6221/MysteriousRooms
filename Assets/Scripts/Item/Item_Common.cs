@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// 汎用的なアイテム用の継承クラス
+/// アイテムを拾ったときに、指定したフラグをオンにするようになっている
+/// インベントリで調べた時のイベントはなし
+/// </summary>
 public class Item_Common : ItemBase
 {
     [SerializeField, Header("このオブジェクトのフラグタイプ")]

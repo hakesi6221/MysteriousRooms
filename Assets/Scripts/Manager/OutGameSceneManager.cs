@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class OutGameSceneManager : MonoBehaviour
@@ -11,7 +12,7 @@ public class OutGameSceneManager : MonoBehaviour
     public void OnMoveScene()
     {
         SoundManager.Instance.PlaySE(0);
-        FadeManager.Instance.CallScene(_moevScene);
+        FadeManager.Instance.CallScene(_moevScene).Forget();
     }
 
     /// <summary>
@@ -28,6 +29,6 @@ public class OutGameSceneManager : MonoBehaviour
 
     void Start()
     {
-        FadeManager.Instance.FadeInDisplay();
+        FadeManager.Instance.FadeIn().Forget();
     }
 }

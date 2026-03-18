@@ -1,6 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// インベントリ画面の、アイテムを表示するアイコンを制御するクラス
+/// 
+/// </summary>
 public class ItemUIIcon : MonoBehaviour
 {
     [SerializeField, Header("アイコンimage")]
@@ -33,7 +37,9 @@ public class ItemUIIcon : MonoBehaviour
     /// </summary>
     public void OnCheckItem()
     {
+        // アイコンに設定されていない場合は無効
         if (_thisItem == null) return;
+        // インベントリ画面以外で呼ばれた場合も無効
         if (MaingameManager.Instance.CurrentOperate != OperateState.Inventry) return;
 
         SoundManager.Instance.PlaySE(0);

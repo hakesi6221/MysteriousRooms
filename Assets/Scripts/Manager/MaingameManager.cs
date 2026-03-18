@@ -4,40 +4,45 @@ using UnityEngine;
 
 
 
-// Œ»İ‘€ì‚µ‚Ä‚¢‚é‚à‚Ì‚ğ•\‚·—ñ‹“Œ^
+// ç¾åœ¨æ“ä½œã—ã¦ã„ã‚‹ã‚‚ã®ã‚’è¡¨ã™åˆ—æŒ™å‹
 public enum OperateState
 {
-    None,
-    Common,
-    Focus,
-    Text,
-    Inventry,
-    Direction,
-    Config,
+    None,           // ä¾‹å¤–ç”¨
+    Common,         // é€šå¸¸çŠ¶æ…‹
+    Focus,          // ã‚¢ã‚¤ãƒ†ãƒ ã®æ³¨ç›®çŠ¶æ…‹
+    Text,           // ãƒ†ã‚­ã‚¹ãƒˆå†ç”Ÿä¸­
+    Inventry,       // ã‚¤ãƒ³ãƒ™ãƒ³ãƒˆãƒªæ“ä½œçŠ¶æ…‹
+    Direction,      // UIã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãªã©ã®æ¼”å‡ºä¸­
+    Config,         // è¨­å®šç”»é¢æ“ä½œçŠ¶æ…‹
 }
+
+/// <summary>
+/// ã‚²ãƒ¼ãƒ ã®ãƒ¡ã‚¤ãƒ³ç”»é¢ã‚’ç®¡ç†ã™ã‚‹ã‚·ãƒ³ã‚°ãƒ«ãƒˆãƒ³ã‚¯ãƒ©ã‚¹
+/// ãƒ¡ã‚¤ãƒ³ç”»é¢ã®é€²è¡Œã€æ“ä½œçŠ¶æ…‹ã®ç®¡ç†ã‚’æ‹…å½“ã™ã‚‹
+/// </summary>
 public class MaingameManager : SingletonMonoBehaviour<MaingameManager>
 {
     protected override bool dontDestroyOnLoad => false;
 
-    [SerializeField, Header("ƒƒCƒ“ƒV[ƒ“n‚Ü‚Á‚½‚É•\¦‚³‚ê‚éƒeƒLƒXƒg")]
+    [SerializeField, Header("ãƒ¡ã‚¤ãƒ³ã‚·ãƒ¼ãƒ³å§‹ã¾ã£ãŸæ™‚ã«è¡¨ç¤ºã•ã‚Œã‚‹ãƒ†ã‚­ã‚¹ãƒˆ")]
     private EventSentences _startSentence = null;
 
-    // Œ»İ‘€ì‚µ‚Ä‚¢‚é‚à‚Ì
+    // ç¾åœ¨æ“ä½œã—ã¦ã„ã‚‹ã‚‚ã®
     private OperateState _operateState = OperateState.None;
 
-    // ’¼‘O‘€ì‚µ‚Ä‚¢‚½‚à‚Ì
+    // ç›´å‰æ“ä½œã—ã¦ã„ãŸã‚‚ã®
     private OperateState _lastOperate = OperateState.None;
 
-    // —š—ğ‚Éc‚ç‚È‚¢•ÏX‚ğs‚Á‚Ä‚¢‚é‚©
+    // å±¥æ­´ã«æ®‹ã‚‰ãªã„å¤‰æ›´ã‚’è¡Œã£ã¦ã„ã‚‹ã‹
     private bool _isChangeStateAbs = false;
 
     /// <summary>
-    /// Œ»İ‘€ì‚µ‚Ä‚¢‚é‚à‚Ì
+    /// ç¾åœ¨æ“ä½œã—ã¦ã„ã‚‹ã‚‚ã®
     /// </summary>
     public OperateState CurrentOperate { get { return _operateState; } }
 
     /// <summary>
-    /// ‘€ì‘ÎÛ‚ğ•ÏX
+    /// æ“ä½œå¯¾è±¡ã‚’å¤‰æ›´
     /// </summary>
     /// <param name="newState"></param>
     public void ChangeOperate(OperateState newState)
@@ -55,7 +60,7 @@ public class MaingameManager : SingletonMonoBehaviour<MaingameManager>
     }
 
     /// <summary>
-    /// •ÏXŒã‚Ìó‘Ô‚ğ•Û‘¶‚¹‚¸‚É‘€ì‘ÎÛ‚ğ•ÏX
+    /// å¤‰æ›´å¾Œã®çŠ¶æ…‹ã‚’ä¿å­˜ã›ãšã«æ“ä½œå¯¾è±¡ã‚’å¤‰æ›´
     /// </summary>
     /// <param name="newState"></param>
     public void ChangeOperateWithoutLog(OperateState newState)
@@ -65,14 +70,14 @@ public class MaingameManager : SingletonMonoBehaviour<MaingameManager>
         _operateState = newState;
     }
 
-    // Œ»İ‚Ìó‘Ô‚ğ—š—ğ‚Éc‚³‚¸A‘€ì‘ÎÛ‚ğ•ÏX
+    // ç¾åœ¨ã®çŠ¶æ…‹ã‚’å±¥æ­´ã«æ®‹ã•ãšã€æ“ä½œå¯¾è±¡ã‚’å¤‰æ›´
     public void ChangeOperateAbs(OperateState newState)
     {
         _operateState = newState;
     }
 
     /// <summary>
-    /// ’¼‘O‚Ì‘€ì‘ÎÛ‚É–ß‚·
+    /// ç›´å‰ã®æ“ä½œå¯¾è±¡ã«æˆ»ã™
     /// </summary>
     public void ReturnOperate()
     {
@@ -92,14 +97,15 @@ public class MaingameManager : SingletonMonoBehaviour<MaingameManager>
         }
         catch (OperationCanceledException)
         {
+            Debug.LogWarning("ç”»é¢ãƒ•ã‚§ãƒ¼ãƒ‰å¾…æ©Ÿä¸­ã«çµ‚äº†ã—ã¾ã—ãŸ");
             return;
         }
 
         SoundManager.Instance.PlayBGMWithFadeIn(1);
-        // ŠJn‚É•\¦‚·‚éƒeƒLƒXƒg‚ª‚ ‚ê‚Î•\¦‚·‚é
+        // é–‹å§‹æ™‚ã«è¡¨ç¤ºã™ã‚‹ãƒ†ã‚­ã‚¹ãƒˆãŒã‚ã‚Œã°è¡¨ç¤ºã™ã‚‹
         if (_startSentence == null || _startSentence.Sentences.Count != 0)
             EventManager.Instance.OnStartEventText(_startSentence, () => ChangeOperateAbs(OperateState.Common));
-        // ‚È‚¢‚È‚ç•’Ê‚ÉŠJn
+        // ãªã„ãªã‚‰æ™®é€šã«é–‹å§‹
         else
             ChangeOperateAbs(OperateState.Common);
     }

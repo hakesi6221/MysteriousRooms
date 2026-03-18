@@ -1,240 +1,392 @@
-using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
+using System;
 
+/// <summary>
+/// 画面のフェードを行うシングルトンクラス
+/// CanvasとImageを用いたシンプルなフェードアウトインを行う
+/// フェードの色と時間を引数で指定できる。しない場合、Inspectorで指定したデフォルトのもので行われる
+/// シーン移動を待機するために、UniTaskを採用
+/// </summary>
+[DefaultExecutionOrder(-1000)]
+[RequireComponent(typeof(CanvasGroup))]
 public class FadeManager : SingletonMonoBehaviour<FadeManager>
 {
+    // 非破壊オブジェクトに設定
     protected override bool dontDestroyOnLoad => true;
 
     [SerializeField, Header("デフォルトのフェード時間")]
     private float _fadeDuration = 2.0f;
-    [SerializeField, Header("フェードのパネルかイメージ")]
+
+    [SerializeField, Header("デフォルトのフェードカラー")]
+    private Color _fadeColor = Color.black;
+
+    [SerializeField, Header("Image")]
     private Image _fadePanel;
 
-    private bool _isFade = false;
-    public bool IsFade { get { return _isFade; } }
+    // CanvasGroup
+    private CanvasGroup _cg = null;
 
-    public void CallScene(string sceneName)
+    public bool IsFade{ get; private set; } = false;
+    /// <summary>
+    /// 待機可能：フェードアウトインを行い、その合間でシーンのロードを行う
+    /// </summary>
+    /// <param name="sceneName">ロードするシーンの名前</param>
+    /// <returns></returns>
+    public async UniTask CallScene(string sceneName, bool isAutoFadeIn = true)
     {
-        // Debug.Log("StartCorutine : FadeOut");
-        StartCoroutine(FadeOutAndLoadScene(sceneName));
-    }
-
-    public void FadeInDisplay()
-    {
-        // Debug.Log("StartCorutine : FadeIn");
-        StartCoroutine(FadeIn());
-    }
-
-    public void FadeOutDisplay()
-    {
-        StartCoroutine(FadeOut());
-    }
-
-    public void CallScene(float fadeDuration, string sceneName)
-    {
-        // Debug.Log("StartCorutine : FadeOut");
-        StartCoroutine(FadeOutAndLoadScene(fadeDuration, sceneName));
-    }
-
-    public void FadeInDisplay(float fadeDuration)
-    {
-        // Debug.Log("StartCorutine : FadeIn");
-        StartCoroutine(FadeIn(fadeDuration));
-    }
-
-    public void FadeOutDisplay(float fadeDuration)
-    {
-        StartCoroutine(FadeOut(fadeDuration));
-    }
-
-    private IEnumerator FadeOutAndLoadScene(string sceneName)
-    {
-        _isFade = true;
-        _fadePanel.enabled = true;
-        float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 0f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 1.0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < _fadeDuration)
+        try
         {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / _fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            await FadeOut(_fadeDuration, _fadeColor);
         }
-        // Debug.Log("Ending Fade");
-
-        _fadePanel.color = _endColor;
-        _isFade = false;
-
-        SceneManager.LoadScene(sceneName);
-
-        _isFade = true;
-        _fadePanel.enabled = true;
-        _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 1f);
-        _startColor = _fadePanel.color;
-        _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < _fadeDuration)
+        catch (OperationCanceledException)
         {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / _fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            return;
         }
-        // Debug.Log("Ending Fade");
 
-        _fadePanel.color = _endColor;
-        _fadePanel.enabled = false;
-        _isFade = false;
+        try
+        {
+            await SceneManager.LoadSceneAsync(sceneName);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (isAutoFadeIn is false) return;
+        try
+        {
+            await FadeIn(_fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
     }
 
-    private IEnumerator FadeOut()
+    /// <summary>
+    /// 待機可能：フェードアウトインを行い、その合間でシーンのロードを行う
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間：秒</param>
+    /// <param name="sceneName">ロードするシーンの名前</param>
+    /// <returns></returns>
+    public async UniTask CallScene(float fadeDuration, string sceneName, bool isAutoFadeIn = true)
     {
-        _isFade = true;
-        _fadePanel.enabled = true;
-        float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 0f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 1.0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < _fadeDuration)
+        try
         {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / _fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            await FadeOut(fadeDuration, _fadeColor);
         }
-        // Debug.Log("Ending Fade");
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
-        _fadePanel.color = _endColor;
-        _isFade = false;
+        try
+        {
+            await SceneManager.LoadSceneAsync(sceneName);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
+
+        if (isAutoFadeIn is false) return;
+        try
+        {
+            await FadeIn(fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
     }
 
-    private IEnumerator FadeIn()
+    /// <summary>
+    /// 待機可能：フェードアウトインを行い、その合間でシーンのロードを行う
+    /// </summary>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <param name="sceneName">ロードするシーンの名前</param>
+    /// <returns></returns>
+    public async UniTask CallScene(Color fadeColor, string sceneName, bool isAutoFadeIn = true)
     {
-        _isFade = true;
-        _fadePanel.enabled = true;
-        float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 1f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < _fadeDuration)
+        try
         {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / _fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            await FadeOut(_fadeDuration, fadeColor);
         }
-        // Debug.Log("Ending Fade");
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
-        _fadePanel.color = _endColor;
-        _fadePanel.enabled = false;
-        _isFade = false;
+        try
+        {
+            await SceneManager.LoadSceneAsync(sceneName);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+
+        if (isAutoFadeIn is false) return;
+        try
+        {
+            await FadeIn(_fadeDuration, fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
     }
 
-    private IEnumerator FadeOutAndLoadScene(float fadeDuration, string sceneName)
+    /// <summary>
+    /// 待機可能：フェードアウトインを行い、その合間でシーンのロードを行う
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間：秒</param>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <param name="sceneName">ロードするシーンの名前</param>
+    /// <returns></returns>
+    public async UniTask CallScene(float fadeDuration, Color fadeColor, string sceneName, bool isAutoFadeIn = true)
     {
-        _isFade = true;
-        _fadePanel.enabled = true;
-        float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 0f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 1.0f);
+        try
+        {
+            await FadeOut(fadeDuration, fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
 
-        // Debug.Log("Starting Fade");
+        try
+        {
+            await SceneManager.LoadSceneAsync(sceneName);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+
+        if (isAutoFadeIn is false) return;
+        try
+        {
+            await FadeIn(fadeDuration, fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードアウトを行う
+    /// 全体を覆うImageが透明度0から1に向かう
+    /// </summary>
+    /// <returns></returns>
+    public async UniTask FadeOut()
+    {
+        try
+        {
+            await FadeOut(_fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードインを行う
+    /// 全体を覆うImageが透明度1fから0fに向かう
+    /// </summary>
+    /// <returns></returns>
+    public async UniTask FadeIn()
+    {
+        try
+        {
+            await FadeIn(_fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードアウトを行う
+    /// 全体を覆うImageが透明度0から1に向かう
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間：秒</param>
+    /// <returns></returns>
+    public async UniTask FadeOut(float fadeDuration)
+    {
+        try
+        {
+            await FadeOut(fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードインを行う
+    /// 全体を覆うImageが透明度1fから0fに向かう
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間</param>
+    /// <returns></returns>
+    public async UniTask FadeIn(float fadeDuration)
+    {
+        try
+        {
+            await FadeIn(fadeDuration, _fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードアウトを行う
+    /// 全体を覆うImageが透明度0から1に向かう
+    /// </summary>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <returns></returns>
+    public async UniTask FadeOut(Color fadeColor)
+    {
+        try
+        {
+            await FadeOut(_fadeDuration, fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードインを行う
+    /// 全体を覆うImageが透明度1fから0fに向かう
+    /// </summary>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <returns></returns>
+    public async UniTask FadeIn(Color fadeColor)
+    {
+        try
+        {
+            await FadeIn(_fadeDuration, fadeColor);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+    }
+
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードアウトを行う
+    /// 全体を覆うImageが透明度0から1に向かう
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間：秒</param>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <returns></returns>
+    public async UniTask FadeOut(float fadeDuration, Color fadeColor)
+    {
+        if (_fadePanel == null)
+        {
+            Debug.LogWarning($"{this.name}：フェード対象のImageがアタッチされていません");
+        }
+        if (_cg == null)
+        {
+            Debug.LogWarning($"{this.name}：フェード対象のCanvasGroupがアタッチされていません");
+        }
+        var token = this.GetCancellationTokenOnDestroy();
+        IsFade = true;
+        float _timeCount = 0.0f;
+        _fadePanel.color = fadeColor;
+        _fadePanel.enabled = true;
+
+        // CanvasGroupのAlphaをTweenすることでフェードを行う
         while (_timeCount < fadeDuration)
         {
             _timeCount += Time.deltaTime;
             float t = Mathf.Clamp01(_timeCount / fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            _cg.alpha = Mathf.Lerp(0.0f, 1.0f, t);
+            try
+            {
+                await UniTask.Yield(cancellationToken: token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
         }
-        // Debug.Log("Ending Fade");
 
-        _fadePanel.color = _endColor;
-        _isFade = false;
-
-        SceneManager.LoadScene(sceneName);
-
-        _isFade = true;
-        _fadePanel.enabled = true;
-        _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 1f);
-        _startColor = _fadePanel.color;
-        _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < fadeDuration)
-        {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
-        }
-        // Debug.Log("Ending Fade");
-
-        _fadePanel.color = _endColor;
-        _fadePanel.enabled = false;
-        _isFade = false;
-    }
-
-    private IEnumerator FadeOut(float fadeDuration)
-    {
-        _isFade = true;
-        _fadePanel.enabled = true;
-        float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 0f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 1.0f);
-
-        // Debug.Log("Starting Fade");
-        while (_timeCount < fadeDuration)
-        {
-            _timeCount += Time.deltaTime;
-            float t = Mathf.Clamp01(_timeCount / fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
-        }
-        // Debug.Log("Ending Fade");
-
-        _fadePanel.color = _endColor;
-        _isFade = false;
+        _cg.alpha = 1.0f;
+        IsFade = false;
 
     }
 
-    private IEnumerator FadeIn(float fadeDuration)
+    /// <summary>
+    /// 待機可能：画面全体のシンプルなフェードインを行う
+    /// 全体を覆うImageが透明度1fから0fに向かう
+    /// </summary>
+    /// <param name="fadeDuration">フェードの所要時間：秒</param>
+    /// <param name="fadeColor">フェード時のImageの色</param>
+    /// <returns></returns>
+    public async UniTask FadeIn(float fadeDuration, Color fadeColor)
     {
-        _isFade = true;
-        _fadePanel.enabled = true;
+        if (_fadePanel == null)
+        {
+            Debug.LogWarning($"{this.name}：フェード対象のImageがアタッチされていません");
+        }
+        if (_cg == null)
+        {
+            Debug.LogWarning($"{this.name}：フェード対象のCanvasGroupがアタッチされていません");
+        }
+        var token = this.GetCancellationTokenOnDestroy();
+        IsFade = true;
         float _timeCount = 0.0f;
-        _fadePanel.color = new Color(_fadePanel.color.r, _fadePanel.color.g, _fadePanel.color.b, 1f);
-        Color _startColor = _fadePanel.color;
-        Color _endColor = new Color(_startColor.r, _startColor.g, _startColor.b, 0f);
+        _fadePanel.color = fadeColor;
+        _fadePanel.enabled = true;
 
-        // Debug.Log("Starting Fade");
+        // CanvasGroupのAlphaをTweenすることでフェードを行う
         while (_timeCount < fadeDuration)
         {
             _timeCount += Time.deltaTime;
             float t = Mathf.Clamp01(_timeCount / fadeDuration);
-            _fadePanel.color = Color.Lerp(_startColor, _endColor, t);
-            yield return null;
+            _cg.alpha = Mathf.Lerp(1.0f, 0.0f, t);
+            try
+            {
+                await UniTask.Yield(cancellationToken: token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
         }
-        // Debug.Log("Ending Fade");
 
-        _fadePanel.color = _endColor;
+        _cg.alpha = 0.0f;
         _fadePanel.enabled = false;
-        _isFade = false;
+        IsFade = false;
+    }
+
+    void Start()
+    {
+        // RequireComponentで強制的にアタッチしている
+        // CanvasGroupを取得
+        _cg = GetComponent<CanvasGroup>();
+    }
+
+    new void Awake()
+    {
+        base.Awake();
+        DontDestroyOnLoad(this);
     }
 }
 

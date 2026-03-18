@@ -1,6 +1,11 @@
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// フラグを管理する連想配列を生成するためのジェネリッククラス
+/// インスタンス生成時に渡したEnumをKeyに、boolをvalueにしたDictionaryを生成し、それの参照、更新などが可能
+/// </summary>
+/// <typeparam name="T"></typeparam>
 public class FlagDictionary<T> where T : Enum
 {
     // フラグのディクショナリー
