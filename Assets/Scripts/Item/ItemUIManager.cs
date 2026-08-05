@@ -34,9 +34,9 @@ public class ItemUIManager : MonoBehaviour
         for (int i = 0; i < _itemIcons.Count; i++)
         {
             // アイテムを所持している状態なら
-            if (ItemManager.Instance.HavingItemList.Count > i)
+            if (ItemManager.Instance.ItemCount > i)
             {
-                _itemIcons[i].SetIconItem(ItemManager.Instance.HavingItemList[i]);
+                _itemIcons[i].SetIconItem(ItemManager.Instance.GetHavingItemByIndex(i));
             }
             else
             {

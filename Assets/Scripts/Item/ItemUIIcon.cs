@@ -43,7 +43,7 @@ public class ItemUIIcon : MonoBehaviour
         if (MaingameManager.Instance.CurrentOperate != OperateState.Inventry) return;
 
         SoundManager.Instance.PlaySE(0);
-        EventManager.Instance.OnStartEventText(_thisItem.ItemSummury, _thisItem.OnAfterCheckEvent);
+        EventManager.Instance.OnStartEventText(_thisItem.ItemSummary, _thisItem.OnAfterCheckEvent);
     }
 
     /// <summary>
