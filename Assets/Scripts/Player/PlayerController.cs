@@ -30,7 +30,7 @@ public class PlayerController : MonoBehaviour
 
         if (tapObj == null) return;
         Debug.Log("イベントオブジェクトをタッチ");
-        tapObj.OnIntractEvent();
+        tapObj.OnInteractEvent();
         SoundManager.Instance.PlaySE(4);
     }
 
@@ -87,7 +87,7 @@ public class PlayerController : MonoBehaviour
         if (pointer == null) return;
 
         Vector3 pointerPos = pointer.position.ReadValue();
-        IInteractiveObj tapObj = EventManager.Instance.OnGetObjInfoByRay(pointerPos);
+        IUpdateCursorObj tapObj = EventManager.Instance.OnGetCursorUpdateByRay(pointerPos);
 
         // カーソルを合わせているオブジェクトがないなら、カーソルはデフォルトに
         if (tapObj == null)

@@ -123,16 +123,16 @@ public class EventManager : SingletonMonoBehaviour<EventManager>
     /// </summary>
     /// <param name="tapPos"></param>
     /// <returns></returns>
-    public IUpdateCursor OnGetCursorUpdateByRay(Vector3 tapPos)
+    public IUpdateCursorObj OnGetCursorUpdateByRay(Vector3 tapPos)
     {
-        IUpdateCursor cursorUpdate = null;
+        IUpdateCursorObj cursorUpdate = null;
         Ray ray = _operateCamera.ScreenPointToRay(tapPos);
         RaycastHit hit;
         Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
 
         if (Physics.Raycast(ray, out hit))
         {
-            cursorUpdate = hit.collider.gameObject.GetComponent<IUpdateCursor>();
+            cursorUpdate = hit.collider.gameObject.GetComponent<IUpdateCursorObj>();
         }
 
         return cursorUpdate;
