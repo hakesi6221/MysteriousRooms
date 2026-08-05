@@ -6,7 +6,7 @@ using UnityEngine;
 /// テキスト発生後にイベントが発生するかを継承可能のプロパティで設定できる
 /// 発生させる際には、TextAfterEventを継承して実装する必要あり
 /// </summary>
-public class InteractiveObjTextBase : MonoBehaviour, IInteractiveObj
+public class InteractiveObjTextBase : MonoBehaviour, IInteractiveObj, IUpdateCursorObj
 {
     /// <summary>
     /// テキスト終了後にイベントが発生するか
@@ -29,7 +29,7 @@ public class InteractiveObjTextBase : MonoBehaviour, IInteractiveObj
         return;
     }
 
-    public void OnIntractEvent()
+    public void OnInteractEvent()
     {
         // テキストを再生
         // テキスト後イベントを発生させるなら渡し、ないなら渡さない

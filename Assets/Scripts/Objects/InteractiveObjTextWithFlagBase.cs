@@ -6,14 +6,14 @@ using UnityEngine;
 /// InteractiveObjTextBaseと同じようなつくりになっているが、Inspectorで指定したフラグに応じて再生するテキストが切り替わる
 /// フラグがオンになった後のテキストは、一度のみ再生されるかどうかを設定可能
 /// </summary>
-public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObj
+public class InteractiveObjTextWithFlagBase : MonoBehaviour, IInteractiveObj, IUpdateCursorObj
 {
     /// <summary>
     /// テキスト終了後にイベントが発生するか
     /// デフォルトではfalse
     /// 継承して実装する必要あり
     /// </summary>
-    protected virtual bool _isAfterEvent{ get; private set; } = false;
+    protected virtual bool IsAfterEvent{ get; private set; } = false;
 
     [SerializeField, Header("フラグオン後のテキストは一度のみか")]
     private bool _isOnce = false;
@@ -55,13 +55,13 @@ public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObj
         return;
     }
 
-    public void OnIntractEvent()
+    public void OnInteractEvent()
     {
         // フラグに応じて、再生するテキストを変更
         // 再生部分はInteractiveObjTextBaseと同じ
         if (!FlagManager.Instance.Flags.GetFlagValue(_flagType) || (_isOnce && _hasOn))
         {
-            if (_isAfterEvent)
+            if (IsAfterEvent)
                 EventManager.Instance.OnStartEventText(_sentences, TextAfterEvent);
             else
                 EventManager.Instance.OnStartEventText(_sentences);
@@ -69,7 +69,7 @@ public class InteractiveObjText_WithFlagBase : MonoBehaviour, IInteractiveObj
         else
         {
             _hasOn = true;
-            if (_isAfterEvent)
+            if (IsAfterEvent)
                 EventManager.Instance.OnStartEventText(_onFlagSentence, OnFlagTextAfterEvent);
             else
                 EventManager.Instance.OnStartEventText(_onFlagSentence);

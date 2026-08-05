@@ -6,12 +6,12 @@ using UnityEngine;
 /// InteractiveObjText_WithFlagBaseを継承
 /// フラグがオンの時のみ、イベントが発生する
 /// </summary>
-public class InteractiveObjText_WithFlag_Door : InteractiveObjText_WithFlagBase
+public class InteractiveObjDoor : InteractiveObjTextWithFlagBase
 {
     [SerializeField, Header("クリアシーンの名前")]
     private string _clearSceneName = "ClearScene";
 
-    protected override bool _isAfterEvent => true;
+    protected override bool IsAfterEvent => true;
 
     protected override void OnFlagTextAfterEvent()
     {

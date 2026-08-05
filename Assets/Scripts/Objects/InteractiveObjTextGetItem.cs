@@ -5,7 +5,7 @@ using UnityEngine;
 /// InteractiveObjTextBaseを継承
 /// テキスト終了後イベントとして、Inspectorで指定したアイテムを入手することができる
 /// </summary>
-public class InteractiveObjText_GetItem : InteractiveObjTextBase
+public class InteractiveObjTextGetItem : InteractiveObjTextBase
 {
     protected override bool _isAfterEvent => true;
 

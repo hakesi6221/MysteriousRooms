@@ -5,9 +5,9 @@ using UnityEngine;
 /// InteractiveObjText_WithFlagBaseを継承
 /// フラグがオンの時に、絵画が外れるイベントが発生する
 /// </summary>
-public class InteractiveObjText_WithFlag_Frame : InteractiveObjText_WithFlagBase
+public class InteractiveObjFrame : InteractiveObjTextWithFlagBase
 {
-    protected override bool _isAfterEvent => true;
+    protected override bool IsAfterEvent => true;
     [SerializeField, Header("絵画のコライダー")]
     private Collider _collider;
 

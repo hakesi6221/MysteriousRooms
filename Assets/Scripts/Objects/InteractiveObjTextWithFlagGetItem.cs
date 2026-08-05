@@ -4,9 +4,9 @@ using UnityEngine;
 /// インタラクト時、テキストを再生後アイテムが入手できるタイプのオブジェクトを制御するクラス
 /// InteractiveObjText_WithFlagBaseを継承しているため、フラグのオンオフによって、入手可能なアイテムを変えられる
 /// </summary>
-public class InteractiveObjText_WithFlag_GetItem : InteractiveObjText_WithFlagBase
+public class InteractiveObjTextWithFlagGetItem : InteractiveObjTextWithFlagBase
 {
-    protected override bool _isAfterEvent => true;
+    protected override bool IsAfterEvent => true;
 
     [SerializeField, Header("フラグがオフの時の取得するアイテムのオブジェクト")]
     private GameObject _objOff = null;

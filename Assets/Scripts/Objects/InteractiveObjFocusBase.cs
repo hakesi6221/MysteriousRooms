@@ -8,7 +8,7 @@ using UnityEngine;
 /// 注目したとき、それを終了したときにイベントが発生するかどうかの継承可能プロパティがある
 /// 上記プロパティをtrueで継承し、各関数を継承し実装した場合、実行される
 /// </summary>
-public class InteractiveObjFocusBase : MonoBehaviour, IInteractiveObj
+public class InteractiveObjFocusBase : MonoBehaviour, IInteractiveObj, IUpdateCursorObj
 {
     /// <summary>
     ///  注目開始時にイベントを発生させるか
@@ -64,7 +64,7 @@ public class InteractiveObjFocusBase : MonoBehaviour, IInteractiveObj
         return;
     }
 
-    public void OnIntractEvent()
+    public void OnInteractEvent()
     {
         // コライダーの切り替え
         foreach (Collider thisObj in _thisObjColliders)
