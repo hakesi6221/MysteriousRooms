@@ -5,7 +5,8 @@ using UnityEngine;
 /// 調べた時にフラグがオンになるのは汎用クラスと共通
 /// インベントリで調べた時に、テキスト再生後、
 /// </summary>
-public class Item_TVRemote : ItemBase
+[CreateAssetMenu(fileName = "ItemCommon", menuName = "ScriptableObjects/CreateTVRemoteItemData")]
+public class ItemTVRemote : ItemBase
 {
     [SerializeField, Header("モニターをつけるときのテキスト")]
     private EventSentences _monitorTexts = null;
@@ -22,7 +23,7 @@ public class Item_TVRemote : ItemBase
     public override void OnPickUpEvent()
     {
         FlagManager.Instance.Flags.SetFlagValue(_flagType, true);
-        ItemManager.Instance.HavingItemList.Add(this);
+        ItemManager.Instance.AddItem(this);
     }
 
     public override void OnAfterCheckEvent()

@@ -5,7 +5,8 @@ using UnityEngine;
 /// アイテムを拾ったときに、指定したフラグをオンにするようになっている
 /// インベントリで調べた時のイベントはなし
 /// </summary>
-public class Item_Common : ItemBase
+[CreateAssetMenu(fileName = "ItemCommon", menuName = "ScriptableObjects/CreateCommonItemData")]
+public class ItemCommon : ItemBase
 {
     [SerializeField, Header("このオブジェクトのフラグタイプ")]
     private Flags _flagType;
@@ -13,11 +14,6 @@ public class Item_Common : ItemBase
     public override void OnPickUpEvent()
     {
         FlagManager.Instance.Flags.SetFlagValue(_flagType, true);
-        ItemManager.Instance.HavingItemList.Add(this);
-    }
-
-    public override void OnAfterCheckEvent()
-    {
-
+        ItemManager.Instance.AddItem(this);
     }
 }
