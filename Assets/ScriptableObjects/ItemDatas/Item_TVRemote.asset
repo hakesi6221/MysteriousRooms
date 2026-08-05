@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1b67144181358748aa36813773d4b97, type: 3}
+  m_Name: Item_TVRemote
+  m_EditorClassIdentifier: 
+  _itemName: "\u30C6\u30EC\u30D3\u306E\u30EA\u30E2\u30B3\u30F3"
+  _itemSummary: {fileID: 11400000, guid: dad9ad86154e6f14aa55f4c9e1715700, type: 2}
+  _itemTexture: {fileID: 21300000, guid: c093dbcf5547735448f52ad774507b39, type: 3}
+  _flagType: 0
