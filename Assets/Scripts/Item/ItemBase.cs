@@ -9,7 +9,7 @@ using UnityEngine;
 /// 名前、インタラクト時のテキスト、アイコン用のテクスチャの情報と、
 /// 入手後イベント、インベントリでのインタラクト後イベントの関数を持っている
 /// </summary>
-public abstract class ItemBase : MonoBehaviour
+public abstract class ItemBase : ScriptableObject
 {
     [SerializeField, Header("アイテムの名前")]
     private string _itemName = string.Empty;
@@ -20,12 +20,12 @@ public abstract class ItemBase : MonoBehaviour
     public string ItemName { get { return _itemName; } }
 
     [SerializeField, Header("アイテムを調べた時のテキスト")]
-    private EventSentences _itemSummury = null;
+    private EventSentences _itemSummary = null;
 
     /// <summary>
     /// アイテムを調べた時のテキスト
     /// </summary>
-    public EventSentences ItemSummury { get { return _itemSummury; } }
+    public EventSentences ItemSummary { get { return _itemSummary; } }
 
     [SerializeField, Header("インベントリにアイコンとして表示するテクスチャ")]
     private Sprite _itemTexture = null;
@@ -43,5 +43,8 @@ public abstract class ItemBase : MonoBehaviour
     /// <summary>
     /// このアイテムをインベントリで調べた時に発生するイベント
     /// </summary>
-    public abstract void OnAfterCheckEvent();
+    public virtual void OnAfterCheckEvent()
+    {
+        // 元は処理なし
+    }
 }
