@@ -103,10 +103,10 @@ public class EventManager : SingletonMonoBehaviour<EventManager>
     /// <summary>
     /// カメラの正面方向にRayを放ち、当たって、インタラクトできるオブジェクトだった場合その情報を返す
     /// </summary>
-    public IInteractiveObj OnGetObjInfoByRay(Vector3 _tapPos)
+    public IInteractiveObj OnGetObjInfoByRay(Vector3 tapPos)
     {
         IInteractiveObj objInfo = null;
-        Ray ray = _operateCamera.ScreenPointToRay(_tapPos);
+        Ray ray = _operateCamera.ScreenPointToRay(tapPos);
         RaycastHit hit;
         Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
 
@@ -118,6 +118,25 @@ public class EventManager : SingletonMonoBehaviour<EventManager>
         return objInfo;
     }
 
+    /// <summary>
+    /// カメラの正面方向にRayを放ち、当たって、カーソルが変わるオブジェクトだった場合そのコンポーネントを返す
+    /// </summary>
+    /// <param name="tapPos"></param>
+    /// <returns></returns>
+    public IUpdateCursor OnGetCursorUpdateByRay(Vector3 tapPos)
+    {
+        IUpdateCursor cursorUpdate = null;
+        Ray ray = _operateCamera.ScreenPointToRay(tapPos);
+        RaycastHit hit;
+        Debug.DrawRay(ray.origin, ray.direction * 100f, Color.red);
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            cursorUpdate = hit.collider.gameObject.GetComponent<IUpdateCursor>();
+        }
+
+        return cursorUpdate;
+    }
 
     /// <summary>
     /// イベントテキストの表示開始
